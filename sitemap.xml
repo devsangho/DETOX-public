@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://devsangho.github.io/DETOX-public/</loc>
     <lastmod>2026-11-23</lastmod>
@@ -8,6 +8,30 @@
     <image:image><image:loc>https://devsangho.github.io/DETOX-public/static/og.jpg</image:loc></image:image>
     <image:image><image:loc>https://devsangho.github.io/DETOX-public/static/img/detox_method.webp</image:loc></image:image>
     <image:image><image:loc>https://devsangho.github.io/DETOX-public/static/img/ur5e_setup.jpg</image:loc></image:image>
+    <video:video>
+      <video:thumbnail_loc>https://devsangho.github.io/DETOX-public/static/videos/release_object.jpg</video:thumbnail_loc>
+      <video:title>Abrupt release, LIBERO-Object: replay without and with the DETOX hold</video:title>
+      <video:description>A recorded attacked LIBERO episode replayed side by side: the recorded actions (left) and the same actions with the DETOX hold from its alarm (right).</video:description>
+      <video:content_loc>https://devsangho.github.io/DETOX-public/static/videos/release_object.mp4</video:content_loc>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://devsangho.github.io/DETOX-public/static/videos/release_spatial.jpg</video:thumbnail_loc>
+      <video:title>Abrupt release, LIBERO-Spatial: replay without and with the DETOX hold</video:title>
+      <video:description>A recorded attacked LIBERO episode replayed side by side: the recorded actions (left) and the same actions with the DETOX hold from its alarm (right).</video:description>
+      <video:content_loc>https://devsangho.github.io/DETOX-public/static/videos/release_spatial.mp4</video:content_loc>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://devsangho.github.io/DETOX-public/static/videos/contact.jpg</video:thumbnail_loc>
+      <video:title>Forceful contact, LIBERO-Spatial: replay without and with the DETOX hold</video:title>
+      <video:description>A recorded attacked LIBERO episode replayed side by side: the recorded actions (left) and the same actions with the DETOX hold from its alarm (right).</video:description>
+      <video:content_loc>https://devsangho.github.io/DETOX-public/static/videos/contact.mp4</video:content_loc>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://devsangho.github.io/DETOX-public/static/videos/overspeed.jpg</video:thumbnail_loc>
+      <video:title>Overspeed, LIBERO-Spatial: replay without and with the DETOX hold</video:title>
+      <video:description>A recorded attacked LIBERO episode replayed side by side: the recorded actions (left) and the same actions with the DETOX hold from its alarm (right).</video:description>
+      <video:content_loc>https://devsangho.github.io/DETOX-public/static/videos/overspeed.mp4</video:content_loc>
+    </video:video>
   </url>
   <url>
     <loc>https://devsangho.github.io/DETOX-public/llms.txt</loc>

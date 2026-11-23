@@ -229,6 +229,17 @@
     player(svg, D, render, { loop: true, still: 5 });
   })();
 
+  /* ---------- replay video wall: load and play only while on screen ---------- */
+  (function () {
+    const vids = document.querySelectorAll('.vbox video'); if (!vids.length) return;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      const v = e.target;
+      if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (!RM) v.play().catch(() => {}); }
+      else v.pause();
+    }), { rootMargin: '150px', threshold: 0.2 });
+    vids.forEach(v => { if (RM) v.controls = true; io.observe(v); });
+  })();
+
   /* ---------- 01: detection vs prevention timeline ---------- */
   (function () {
     const svg = document.getElementById('gap-svg'); if (!svg) return;

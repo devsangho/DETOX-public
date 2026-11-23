@@ -462,6 +462,33 @@
     </div>
     <p class="note reveal">Release detection and prevention pool LIBERO-Object (63 events) and LIBERO-Spatial (44). Gradual slips without an opening
       command and bystander removals leave too weak a trace in these channels and are outside the defended classes.</p>
+    <div class="vwall-head reveal">
+      <h3 class="sub">Recorded attacks, replayed with and without the hold</h3>
+      <p class="lede">Each clip replays one recorded attacked episode of the test batch in its own LIBERO scene, frame by frame.
+        Left: the recorded actions, so the harm happens. Right: the same actions until the frozen DETOX alarm, then the hold.
+        Both replays match the recorded simulator states up to the alarm step. Real time, 20&nbsp;Hz.</p>
+    </div>
+    <div class="vwall">
+      <figure class="vtile reveal">
+        <div class="vbox"><video data-src="static/videos/release_object.mp4" poster="static/videos/release_object.jpg" muted loop playsinline preload="none" aria-label="Abrupt release, LIBERO-Object · BackdoorVLA trigger: replay without DETOX on the left and with the DETOX hold on the right"></video></div>
+        <figcaption><b>Abrupt release</b><span>LIBERO-Object · BackdoorVLA trigger</span><span class="mono">alarm 5 steps (250 ms) before onset · with hold: kept in the gripper</span></figcaption>
+      </figure>
+      <figure class="vtile reveal">
+        <div class="vbox"><video data-src="static/videos/release_spatial.mp4" poster="static/videos/release_spatial.jpg" muted loop playsinline preload="none" aria-label="Abrupt release, LIBERO-Spatial · instruction hijack: replay without DETOX on the left and with the DETOX hold on the right"></video></div>
+        <figcaption><b>Abrupt release</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 11 steps (550 ms) before onset · with hold: kept in the gripper</span></figcaption>
+      </figure>
+      <figure class="vtile reveal">
+        <div class="vbox"><video data-src="static/videos/contact.mp4" poster="static/videos/contact.jpg" muted loop playsinline preload="none" aria-label="Forceful contact, LIBERO-Spatial · instruction hijack: replay without DETOX on the left and with the DETOX hold on the right"></video></div>
+        <figcaption><b>Forceful contact</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 25 steps (1250 ms) before onset · with hold: push stopped</span></figcaption>
+      </figure>
+      <figure class="vtile reveal">
+        <div class="vbox"><video data-src="static/videos/overspeed.mp4" poster="static/videos/overspeed.jpg" muted loop playsinline preload="none" aria-label="Overspeed, LIBERO-Spatial · instruction hijack: replay without DETOX on the left and with the DETOX hold on the right"></video></div>
+        <figcaption><b>Overspeed</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 25 steps (1250 ms) before onset · with hold: arm stopped</span></figcaption>
+      </figure>
+    </div>
+    <p class="note reveal">Examples are events the replayed hold prevented, one per harm class, chosen by alarm lead. Not every event is prevented: overall the hold
+      prevented 363 of 391 events, and 24 LIBERO-Object releases slipped from the re-closed gripper. Camera: agentview (Object) and top view (Spatial).</p>
+
   </div>
 </section>
 
@@ -672,7 +699,7 @@
         </div>
         <svg id="hw-svg" viewBox="0 0 640 380" role="img" aria-label="Recorded gripper aperture in millimetres against time from the opening onset for two triggered trials. With the DETOX hold, the alarm comes 150 milliseconds after onset and the fingers reverse at about 15 millimetres of opening; the toy stays in the gripper. Without the hold, the gripper opens fully and the toy falls."></svg>
         <p class="note" style="margin-top:10px">One protected and one unprotected triggered trial from the same session, aligned at the opening onset. On hardware the alarm came a median 3 steps (150&nbsp;ms)
-          after the opening command, when the fingers had opened 10&nbsp;mm; they reversed at a median 15&nbsp;mm. Operator verdicts: kept (with hold), fell (without).</p>
+          after the opening command, when the fingers had opened 10&nbsp;mm; they reversed at a median 15&nbsp;mm. Operator verdicts: kept (with hold), fell (without). The hardware trials logged telemetry and one start photo per trial, not video.</p>
       </div>
     </div>
   </div>
