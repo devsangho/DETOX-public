@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://devsangho.github.io/DETOX-public/sitemap.xml

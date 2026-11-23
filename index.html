@@ -1,28 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DETOX: Runtime Defense for Vision–Language–Action Models under Attack</title>
-<meta name="description" content="DETOX is a runtime defense for VLA robot policies. It reads only owner-side physical telemetry and replaces the next command with a hold before an attacked policy drops an object, pushes a bystander, or moves too fast.">
-<!-- Under double-blind review: keep the page out of search indexes until the review period ends. -->
-<meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#f4f5f2">
+<meta name="description" content="DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot&#x27;s own trusted telemetry and replaces the next command with a hold before a backdoored or hijacked policy drops an object, pushes a bystander, or moves too fast.">
+<link rel="canonical" href="https://devsangho.github.io/DETOX-public/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1, max-snippet:-1">
 <meta name="author" content="Sangho Yun, Minsoo Kim, Hwanjo Yu">
+<meta name="keywords" content="DETOX, VLA safety, VLA defense, vision-language-action, VLA backdoor, backdoor attack, runtime defense, runtime monitoring, trusted telemetry, harm prevention, anomaly detection, conformal calibration, robot safety, robot manipulation, OpenVLA-OFT, BackdoorVLA, LIBERO, UR5e, POSTECH">
+<meta name="theme-color" content="#f4f5f2">
+<link rel="alternate" type="text/markdown" href="llms.txt" title="Plain-text summary for language models">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DETOX">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="DETOX: Runtime Defense for Vision–Language–Action Models under Attack">
+<meta property="og:description" content="Stop the physical harm of a compromised VLA policy from trusted telemetry alone. 388 of 391 harm events flagged before onset at 0.56% clean false alarms, 92.8% prevented; 9 of 10 triggered releases kept on a real UR5e.">
+<meta property="og:url" content="https://devsangho.github.io/DETOX-public/">
+<meta property="og:updated_time" content="2026-11-23T15:00:00+09:00">
+<meta property="og:image" content="https://devsangho.github.io/DETOX-public/static/og.jpg">
+<meta property="og:image:secure_url" content="https://devsangho.github.io/DETOX-public/static/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="DETOX: Runtime Defense for Vision-Language-Action Models under Attack, with headline results">
+<meta property="og:image" content="https://devsangho.github.io/DETOX-public/static/img/detox_method.webp">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="824">
+<meta property="og:image:alt" content="DETOX at run time and in training: context-normalized score, conformal threshold, and hold">
+<meta property="article:published_time" content="2026-11-23T13:00:00+09:00">
+<meta property="article:modified_time" content="2026-11-23T15:00:00+09:00">
+<meta property="article:author" content="Sangho Yun">
+<meta property="article:author" content="Minsoo Kim">
+<meta property="article:author" content="Hwanjo Yu">
+<meta property="article:section" content="Robotics">
+<meta property="article:tag" content="VLA safety">
+<meta property="article:tag" content="VLA defense">
+<meta property="article:tag" content="vision-language-action">
+<meta property="article:tag" content="VLA backdoor">
+<meta property="article:tag" content="backdoor attack">
+<meta property="article:tag" content="runtime defense">
+<meta property="article:tag" content="runtime monitoring">
+<meta property="article:tag" content="trusted telemetry">
+<meta property="article:tag" content="harm prevention">
+<meta property="article:tag" content="anomaly detection">
+<meta property="article:tag" content="conformal calibration">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DETOX: Runtime Defense for Vision–Language–Action Models under Attack">
+<meta name="twitter:description" content="Stop the physical harm of a compromised VLA policy from trusted telemetry alone. 388 of 391 harm events flagged before onset at 0.56% clean false alarms, 92.8% prevented; 9 of 10 triggered releases kept on a real UR5e.">
+<meta name="twitter:image" content="https://devsangho.github.io/DETOX-public/static/og.jpg">
+<meta name="twitter:image:alt" content="DETOX project page card with headline results">
+
+<!-- Google Scholar -->
 <meta name="citation_title" content="DETOX: Runtime Defense for Vision-Language-Action Models under Attack">
 <meta name="citation_author" content="Yun, Sangho">
 <meta name="citation_author" content="Kim, Minsoo">
 <meta name="citation_author" content="Yu, Hwanjo">
 <meta name="citation_author_institution" content="POSTECH">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="DETOX">
-<meta property="og:title" content="DETOX: Runtime Defense for Vision–Language–Action Models under Attack">
-<meta property="og:description" content="Stop the physical harm of a compromised VLA policy from trusted telemetry alone. 388 of 391 harm events flagged before onset at 0.56% clean false alarms; 9 of 10 triggered releases kept on a UR5e.">
-<meta property="og:image" content="static/icon_512.png">
-<meta name="twitter:card" content="summary">
+<meta name="citation_publication_date" content="2026/11/23">
+<meta name="citation_keywords" content="VLA safety; VLA defense; vision-language-action; VLA backdoor; backdoor attack; runtime defense; runtime monitoring; trusted telemetry; harm prevention; anomaly detection; conformal calibration; robot safety; robot manipulation; OpenVLA-OFT">
+
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="static/icon.svg">
-<link rel="icon" type="image/png" href="static/icon_64.png">
-<link rel="apple-touch-icon" href="static/icon_192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="static/icon_32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="static/icon_192.png">
+<link rel="apple-touch-icon" href="static/icon_180.png">
+<link rel="manifest" href="site.webmanifest">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://devsangho.github.io/DETOX-public/#website",
+   "url": "https://devsangho.github.io/DETOX-public/",
+   "name": "DETOX",
+   "description": "Project page for DETOX: Runtime Defense for Vision-Language-Action Models under Attack.",
+   "inLanguage": "en"
+  },
+  {
+   "@type": "WebPage",
+   "@id": "https://devsangho.github.io/DETOX-public/#webpage",
+   "url": "https://devsangho.github.io/DETOX-public/",
+   "name": "DETOX: Runtime Defense for Vision-Language-Action Models under Attack",
+   "description": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot's own trusted telemetry and replaces the next command with a hold before a backdoored or hijacked policy drops an object, pushes a bystander, or moves too fast.",
+   "isPartOf": {
+    "@id": "https://devsangho.github.io/DETOX-public/#website"
+   },
+   "about": {
+    "@id": "https://devsangho.github.io/DETOX-public/#paper"
+   },
+   "primaryImageOfPage": "https://devsangho.github.io/DETOX-public/static/og.jpg",
+   "dateModified": "2026-11-23",
+   "inLanguage": "en"
+  },
+  {
+   "@type": "ScholarlyArticle",
+   "@id": "https://devsangho.github.io/DETOX-public/#paper",
+   "headline": "DETOX: Runtime Defense for Vision-Language-Action Models under Attack",
+   "name": "DETOX: Runtime Defense for Vision-Language-Action Models under Attack",
+   "alternativeHeadline": "DETOX",
+   "url": "https://devsangho.github.io/DETOX-public/",
+   "mainEntityOfPage": "https://devsangho.github.io/DETOX-public/",
+   "abstract": "Vision-language-action (VLA) policies are usually deployed from public checkpoints, and backdoored weights or a manipulated instruction can make the robot drop a carried object, push a bystander object, or move too fast. Detecting the attack is not enough. Once the grip is lost the object is already falling, so the harm must be stopped before onset. Existing defenses read the policy's hidden states or inputs, which the attacker shapes, and do not measure harms prevented. We propose DETOX, a runtime defense that reads only owner-side physical telemetry and, on an alarm, replaces the next command with a hold. We hypothesize that a physical change signals harm only relative to the robot's context, since finger effort drops in a malicious release and in a normal placement alike. DETOX therefore scores each step against clean behavior from the same context, trains without attack data, and calibrates its threshold on clean runs of the deployed model. On 9,393 simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset at 0.56% false alarms, and its replayed hold prevented 363, versus at most 328 for five policy-side baselines. Under an unseen image patch, the frozen DETOX flagged 55 of 73 releases, versus at most 36 for the baselines. On a UR5e arm, its online hold kept the carried object in 9 of 10 triggered releases of a backdoored OpenVLA-OFT policy.",
+   "keywords": [
+    "DETOX",
+    "VLA safety",
+    "VLA defense",
+    "vision-language-action",
+    "VLA backdoor",
+    "backdoor attack",
+    "runtime defense",
+    "runtime monitoring",
+    "trusted telemetry",
+    "harm prevention",
+    "anomaly detection",
+    "conformal calibration",
+    "robot safety",
+    "robot manipulation",
+    "OpenVLA-OFT",
+    "BackdoorVLA",
+    "LIBERO",
+    "UR5e",
+    "POSTECH"
+   ],
+   "inLanguage": "en",
+   "image": "https://devsangho.github.io/DETOX-public/static/og.jpg",
+   "creativeWorkStatus": "Under review",
+   "datePublished": "2026-11-23",
+   "author": [
+    {
+     "@type": "Person",
+     "name": "Sangho Yun",
+     "url": "https://www.devsangho.com",
+     "affiliation": {
+      "@type": "Organization",
+      "name": "POSTECH",
+      "url": "https://www.postech.ac.kr"
+     }
+    },
+    {
+     "@type": "Person",
+     "name": "Minsoo Kim",
+     "affiliation": {
+      "@type": "Organization",
+      "name": "POSTECH",
+      "url": "https://www.postech.ac.kr"
+     }
+    },
+    {
+     "@type": "Person",
+     "name": "Hwanjo Yu",
+     "email": "hwanjoyu@postech.ac.kr",
+     "affiliation": {
+      "@type": "Organization",
+      "name": "POSTECH",
+      "url": "https://www.postech.ac.kr"
+     }
+    }
+   ],
+   "about": [
+    {
+     "@type": "DefinedTerm",
+     "name": "trusted telemetry",
+     "description": "The robot's own physical sensor readings (gripper, wrist force-torque, joints) that the owner controls and the attacker can change only by moving the robot."
+    },
+    {
+     "@type": "DefinedTerm",
+     "name": "context-normalized score",
+     "description": "The squared distance of a step's embedding to the clean center of its physical context, in units of that context's clean spread."
+    },
+    {
+     "@type": "DefinedTerm",
+     "name": "hold",
+     "description": "The command DETOX substitutes after an alarm: zero arm increments, re-close the gripper if an object was held in the last four steps, otherwise keep the last gripper command."
+    }
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://devsangho.github.io/DETOX-public/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "What is DETOX?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which attacks and harms does DETOX defend against?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Why not read the policy's hidden states, images, or instructions?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is the context-normalized score?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context's clean center in units of the context's clean spread. A finger-effort drop is normal when an object is set down but alarming mid-transport. In an ablation, the contexts raised the median alarm lead before a release from 2 to 6 control steps and the prevented releases from 53 to 80 of 107."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does DETOX need attack data?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What results does DETOX achieve?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset (99.2%) at 0.56% clean false alarms (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged and prevented 55 of 73 releases, versus at most 36. On a real UR5e with a backdoored OpenVLA-OFT policy, its online hold kept the carried object in 9 of 10 triggered releases, while without the hold the object fell in 5 of 5."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What are the limits of DETOX?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. In LIBERO-Object, 24 released objects slipped from the re-closed gripper despite an early alarm, so the limit there lies in the hold rather than in sensing."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Are the paper and code available?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The paper is under review and the code will be released upon publication. This page shows the method, the results, and recorded UR5e gripper traces."
+     }
+    }
+   ]
+  },
+  {
+   "@type": "ImageObject",
+   "@id": "https://devsangho.github.io/DETOX-public/#method-figure",
+   "contentUrl": "https://devsangho.github.io/DETOX-public/static/img/detox_method.webp",
+   "name": "DETOX at run time and in training",
+   "caption": "Each step is scored by its embedding's distance to the clean center of its context, in units of the clean spread; training uses no attack data and the threshold is calibrated on clean runs of the deployed model."
+  }
+ ]
+}
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +280,7 @@
       <a href="#context">Key idea</a>
       <a href="#results">Results</a>
       <a href="#hardware">UR5e</a>
+      <a href="#faq">FAQ</a>
       <a href="#bibtex">BibTeX</a>
       <a class="nav-cta" href="#abstract">Abstract ↓</a>
     </nav>
@@ -438,11 +678,33 @@
   </div>
 </section>
 
-<!-- 08 Abstract -->
+<!-- 08 FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">08</span>Questions</div>
+        <h2>DETOX at a Glance</h2>
+      </div>
+    </div>
+    <div class="faq">
+      <div class="card faq-card reveal"><h3>What is DETOX?</h3><p>DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot&#x27;s own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it.</p></div>
+      <div class="card faq-card reveal"><h3>Which attacks and harms does DETOX defend against?</h3><p>DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite.</p></div>
+      <div class="card faq-card reveal"><h3>Why not read the policy&#x27;s hidden states, images, or instructions?</h3><p>Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset.</p></div>
+      <div class="card faq-card reveal"><h3>What is the context-normalized score?</h3><p>Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context&#x27;s clean center in units of the context&#x27;s clean spread. A finger-effort drop is normal when an object is set down but alarming mid-transport. In an ablation, the contexts raised the median alarm lead before a release from 2 to 6 control steps and the prevented releases from 53 to 80 of 107.</p></div>
+      <div class="card faq-card reveal"><h3>Does DETOX need attack data?</h3><p>No. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability.</p></div>
+      <div class="card faq-card reveal"><h3>What results does DETOX achieve?</h3><p>On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset (99.2%) at 0.56% clean false alarms (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged and prevented 55 of 73 releases, versus at most 36. On a real UR5e with a backdoored OpenVLA-OFT policy, its online hold kept the carried object in 9 of 10 triggered releases, while without the hold the object fell in 5 of 5.</p></div>
+      <div class="card faq-card reveal"><h3>What are the limits of DETOX?</h3><p>The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. In LIBERO-Object, 24 released objects slipped from the re-closed gripper despite an early alarm, so the limit there lies in the hold rather than in sensing.</p></div>
+      <div class="card faq-card reveal"><h3>Are the paper and code available?</h3><p>The paper is under review and the code will be released upon publication. This page shows the method, the results, and recorded UR5e gripper traces.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 Abstract -->
 <section class="tint" id="abstract">
   <div class="wrap abstract">
     <div class="reveal">
-      <div class="label"><span class="no">08</span>Paper</div>
+      <div class="label"><span class="no">09</span>Paper</div>
       <h2>Abstract</h2>
       <ul class="meta-list">
         <li><span>Venue</span><b>RSS 2027 (under review)</b></li>
@@ -475,7 +737,7 @@
   <div class="wrap">
     <div class="sec-head reveal">
       <div>
-        <div class="label"><span class="no">09</span>Citation</div>
+        <div class="label"><span class="no">10</span>Citation</div>
         <h2>BibTeX</h2>
       </div>
     </div>

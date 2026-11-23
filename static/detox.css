@@ -361,3 +361,10 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
   .seg button{padding:7px 12px; font-size:12.5px}
   .harm dd{font-size:19px}
 }
+
+/* ---------- FAQ ---------- */
+.faq{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media(max-width:900px){.faq{grid-template-columns:1fr}}
+.faq-card{padding:22px 24px}
+.faq-card h3{margin:0 0 8px; color:var(--ink); font-size:clamp(17px,1.3vw,20px); font-weight:600; letter-spacing:-.02em; line-height:1.35}
+.faq-card p{font-size:15px; line-height:1.6; color:var(--body)}

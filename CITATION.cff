@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use DETOX, please cite it as below."
+title: "DETOX: Runtime Defense for Vision-Language-Action Models under Attack"
+type: article
+authors:
+  - family-names: Yun
+    given-names: Sangho
+    affiliation: POSTECH
+  - family-names: Kim
+    given-names: Minsoo
+    affiliation: POSTECH
+  - family-names: Yu
+    given-names: Hwanjo
+    affiliation: POSTECH
+date-released: "2026-11-23"
+url: "https://devsangho.github.io/DETOX-public/"
+repository-code: "https://github.com/devsangho/DETOX-public"
+abstract: >-
+  DETOX is a runtime defense for vision-language-action robot policies. It reads
+  only the robot's own trusted telemetry and replaces the next command with a hold
+  before a backdoored or hijacked policy drops an object, pushes a bystander, or
+  moves too fast.
+keywords:
+  - VLA safety
+  - VLA defense
+  - vision-language-action
+  - VLA backdoor
+  - backdoor attack
+  - runtime defense
+  - runtime monitoring
+  - trusted telemetry
+  - harm prevention
+  - anomaly detection
+  - conformal calibration

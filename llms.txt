@@ -1,0 +1,42 @@
+# DETOX
+
+> DETOX: Runtime Defense for Vision-Language-Action Models under Attack. Sangho Yun, Minsoo Kim and Hwanjo Yu (corresponding author), POSTECH. Project page: https://devsangho.github.io/DETOX-public/
+
+DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot's own trusted telemetry and replaces the next command with a hold before a backdoored or hijacked policy drops an object, pushes a bystander, or moves too fast. Paper: under review. Code: coming soon.
+
+## Key results
+- Simulation (LIBERO, 9,393 held-out episodes, three attacks: a BackdoorVLA checkpoint, an instruction hijack, and repeated hijacks on a contact-heavy task): 388 of 391 harm events flagged before onset (99.2%) at 0.56% clean false alarms (16 of 2,843); the replayed hold prevented 363 (92.8%).
+- Per harm class (detected before onset / prevented): abrupt release 99.1% / 74.8% (107 events), forceful contact 97.7% / 98.9% (88), overspeed 100% / 100% (196).
+- Baselines on the same episodes, calibration rule and hold (prevented): Bera 83.9%, per-channel limits on the same telemetry 53.7%, FAIL-Detect 16.1%, ActFovea 6.9%, SafeLoop 3.6%, VLA-FAIL 1.8%.
+- Detection is not prevention: FAIL-Detect has attack-detection AUROC 0.97 (DETOX 0.96) but flags only 16.1% of harm events before onset.
+- Context ablation (H2): one shared context instead of four flagged 103 of 107 releases (DETOX 106) but cut the median alarm lead from 6 to 2 steps and prevented releases from 80 to 53.
+- Unseen image patch (frozen DETOX, LIBERO-Goal OFT task): 55 of 73 releases flagged and prevented (75.3%), versus at most 36 for any policy-side variant.
+- Real UR5e (OpenVLA-OFT fine-tuned on 29 demonstrations, backdoored with a text trigger that opens the gripper in transport): online hold kept the object in 9 of 10 triggered releases; without the hold the object fell in 5 of 5; per-channel limits kept 0 of 10; clean false alarms 2 of 20. The alarm came a median 3 steps (150 ms) after the opening command.
+
+## Questions and answers
+### What is DETOX?
+DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it.
+
+### Which attacks and harms does DETOX defend against?
+DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite.
+
+### Why not read the policy's hidden states, images, or instructions?
+Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset.
+
+### What is the context-normalized score?
+Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context's clean center in units of the context's clean spread. A finger-effort drop is normal when an object is set down but alarming mid-transport. In an ablation, the contexts raised the median alarm lead before a release from 2 to 6 control steps and the prevented releases from 53 to 80 of 107.
+
+### Does DETOX need attack data?
+No. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability.
+
+### What results does DETOX achieve?
+On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset (99.2%) at 0.56% clean false alarms (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged and prevented 55 of 73 releases, versus at most 36. On a real UR5e with a backdoored OpenVLA-OFT policy, its online hold kept the carried object in 9 of 10 triggered releases, while without the hold the object fell in 5 of 5.
+
+### What are the limits of DETOX?
+The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. In LIBERO-Object, 24 released objects slipped from the re-closed gripper despite an early alarm, so the limit there lies in the hold rather than in sensing.
+
+### Are the paper and code available?
+The paper is under review and the code will be released upon publication. This page shows the method, the results, and recorded UR5e gripper traces.
+
+## Abstract
+Vision-language-action (VLA) policies are usually deployed from public checkpoints, and backdoored weights or a manipulated instruction can make the robot drop a carried object, push a bystander object, or move too fast. Detecting the attack is not enough. Once the grip is lost the object is already falling, so the harm must be stopped before onset. Existing defenses read the policy's hidden states or inputs, which the attacker shapes, and do not measure harms prevented. We propose DETOX, a runtime defense that reads only owner-side physical telemetry and, on an alarm, replaces the next command with a hold. We hypothesize that a physical change signals harm only relative to the robot's context, since finger effort drops in a malicious release and in a normal placement alike. DETOX therefore scores each step against clean behavior from the same context, trains without attack data, and calibrates its threshold on clean runs of the deployed model. On 9,393 simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset at 0.56% false alarms, and its replayed hold prevented 363, versus at most 328 for five policy-side baselines. Under an unseen image patch, the frozen DETOX flagged 55 of 73 releases, versus at most 36 for the baselines. On a UR5e arm, its online hold kept the carried object in 9 of 10 triggered releases of a backdoored OpenVLA-OFT policy.
