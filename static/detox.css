@@ -41,7 +41,7 @@ svg text{font-family:var(--font-latin)}
 .site-header .wrap{display:flex; align-items:center; justify-content:space-between; height:100%; gap:20px}
 .logo{display:inline-flex; align-items:center; gap:10px; border:0; color:var(--ink); font-weight:600; font-size:17px; letter-spacing:-.03em}
 .logo:hover{color:var(--ink)}
-.logo img{width:26px; height:26px; border-radius:6px}
+.logo img{width:26px; height:26px}
 .logo small{font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:.08em; color:var(--muted)}
 .site-nav{display:flex; gap:clamp(14px,2.2vw,30px); align-items:center}
 .site-nav a{border:0; color:var(--body); font-size:14px; font-weight:500}
