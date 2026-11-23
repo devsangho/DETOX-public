@@ -2,7 +2,7 @@
 
 Runtime Defense for Vision–Language–Action Models under Attack
 
-Authors withheld during double-blind review, POSTECH
+Sangho Yun, Minsoo Kim and Hwanjo Yu (corresponding author), POSTECH
 
 [Project page](https://devsangho.github.io/DETOX-public/) · Paper: coming soon
 

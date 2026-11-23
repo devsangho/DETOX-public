@@ -76,8 +76,15 @@ svg text{font-family:var(--font-latin)}
   font-weight:600; letter-spacing:-.025em; line-height:1.3; text-wrap:balance}
 .hero-claim{margin:18px 0 0; max-width:46ch; color:var(--body); font-size:clamp(16px,1.25vw,19px); font-weight:500; line-height:1.6}
 .hero-claim b{color:var(--ink); font-weight:600}
-.authors{margin:26px 0 0; color:var(--ink); font-size:15px; font-weight:600}
-.authors span{display:block; margin-top:2px; font-size:13px; font-weight:400; color:var(--muted)}
+.authors{margin:30px 0 0; color:var(--ink); font-size:16px; font-weight:600; line-height:1.7}
+.authors span{white-space:nowrap}
+.authors a{color:inherit; border-bottom-color:var(--line-strong)}
+.authors a:hover{border-bottom-color:var(--coral)}
+.affil{display:flex; align-items:center; gap:10px; margin:8px 0 0; color:var(--body); font-size:15px}
+.affil img{width:26px; height:26px}
+.affil a{color:var(--blue)}
+.affil-details{margin:10px 0 0; font-size:13px; line-height:1.6; color:var(--muted)}
+.affil-details a{color:var(--blue)}
 .btn-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px}
 .btn{display:inline-flex; align-items:center; gap:10px; min-height:50px; padding:0 22px;
   font-family:var(--font-latin); font-size:15px; font-weight:600; letter-spacing:-.01em;
