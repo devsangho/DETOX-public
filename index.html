@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DETOX: Runtime Defense for Vision–Language–Action Models under Attack</title>
+<meta name="description" content="DETOX is a runtime defense for VLA robot policies. It reads only owner-side physical telemetry and replaces the next command with a hold before an attacked policy drops an object, pushes a bystander, or moves too fast.">
+<!-- Under double-blind review: keep the page out of search indexes until the review period ends. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f4f5f2">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DETOX">
+<meta property="og:title" content="DETOX: Runtime Defense for Vision–Language–Action Models under Attack">
+<meta property="og:description" content="Stop the physical harm of a compromised VLA policy from trusted telemetry alone. 388 of 391 harm events flagged before onset at 0.56% clean false alarms; 9 of 10 triggered releases kept on a UR5e.">
+<meta property="og:image" content="static/icon_512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/svg+xml" href="static/icon.svg">
+<link rel="icon" type="image/png" href="static/icon_64.png">
+<link rel="apple-touch-icon" href="static/icon_192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/detox.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="DETOX, back to top"><img src="static/icon_64.png" alt="" width="26" height="26">DETOX <small>RSS 2027 · under review</small></a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#trust">Threat model</a>
+      <a href="#context">Key idea</a>
+      <a href="#results">Results</a>
+      <a href="#hardware">UR5e</a>
+      <a href="#bibtex">BibTeX</a>
+      <a class="nav-cta" href="#abstract">Abstract ↓</a>
+    </nav>
+  </div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="kicker">VLA safety · runtime defense</span>
+      <h1 class="brand-hero" aria-label="DETOX"><span>DETOX</span></h1>
+      <p class="full-title">Runtime Defense for Vision&ndash;Language&ndash;Action Models under Attack</p>
+      <p class="hero-claim">A backdoored or hijacked VLA policy can drop what it carries, push a bystander, or move too fast.
+        <b>Detecting the attack is not enough.</b> <span class="dmark">DETOX</span> reads only the robot&rsquo;s own
+        <b>trusted telemetry</b> and replaces the next command with a <b>hold</b> before the harm begins.</p>
+      <p class="authors">Anonymous authors<span>Submitted to RSS 2027 · double-blind review</span></p>
+      <div class="btn-row">
+        <a class="btn primary" href="#abstract">Read the abstract <span class="arr" aria-hidden="true">↓</span></a>
+        <button class="btn disabled" type="button" disabled>Paper (after review)</button>
+        <button class="btn disabled" type="button" disabled>Code (soon)</button>
+        <a class="btn" href="#bibtex">BibTeX</a>
+      </div>
+      <p class="notes">Animations marked <em>schematic</em> illustrate the mechanism. Every number on this page comes from the
+        manuscript, and the UR5e gripper traces are recorded telemetry.</p>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <svg id="hero-svg" viewBox="0 0 560 500" fill="none"></svg>
+      <div class="art-card">
+        <span class="k-a"><i></i>attacked command</span>
+        <span class="k-o"><i></i>DETOX hold</span>
+        <span class="k-q"><i></i>threshold q&#8337;</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stat-band night">
+  <canvas id="stat-canvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="stat-row">
+      <div class="stat"><span class="idx">01 · DETECTED</span><span class="big"><span data-count="388">388</span><small>&thinsp;/ 391</small></span><span class="lbl">Harm events flagged before onset<br><em>9,393 held-out LIBERO episodes</em></span></div>
+      <div class="stat"><span class="idx">02 · PREVENTED</span><span class="big"><span data-count="92.8" data-dec="1">92.8</span><small>%</small></span><span class="lbl">Harm events stopped by the hold<br><em>best policy-side baseline 83.9%</em></span></div>
+      <div class="stat"><span class="idx">03 · FALSE ALARMS</span><span class="big"><span data-count="0.56" data-dec="2">0.56</span><small>%</small></span><span class="lbl">Clean episodes with an alarm<br><em>16 of 2,843, calibrated model</em></span></div>
+      <div class="stat"><span class="idx">04 · UR5E</span><span class="big"><span data-count="9">9</span><small>&thinsp;/ 10</small></span><span class="lbl">Triggered releases kept in hand<br><em>backdoored OpenVLA-OFT, online hold</em></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 01 Problem -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">01</span>The problem</div>
+        <h2>Detecting the Attack Is Not Enough</h2>
+      </div>
+      <p class="lede">Once the grip is lost, the object is already falling. A defense that only labels the episode as
+        attacked, or that reacts after the harm, leaves the damage done. The harm must be stopped <b>before onset</b>,
+        and that is what we measure.</p>
+    </div>
+    <div class="plate gap-stage reveal">
+      <div class="controls">
+        <span class="schematic-tag">schematic</span>
+        <span class="spacer"></span>
+        <button class="pill-btn" id="gap-replay" type="button">↻ Replay</button>
+      </div>
+      <div class="svg-scroll"><svg id="gap-svg" viewBox="0 0 1100 300" role="img" aria-label="Timeline of an attacked episode. The trigger fires, the object would leave the fingers at onset. A detector that reacts at or after onset cannot stop the drop, while DETOX alarms before onset and the hold keeps the object."></svg></div>
+    </div>
+    <div class="tldr" style="margin-top:clamp(40px,5vw,64px)">
+      <div class="reveal">
+        <h3 class="sub">What DETOX does</h3>
+        <p class="tldr-lede" style="margin-top:8px">Existing defenses read the policy&rsquo;s hidden states, images, instructions, or proposed actions,
+          which are <b>exactly the channels the attacker shapes</b>. <span class="dmark">DETOX</span> reads only the
+          gripper, wrist force&ndash;torque, and joint sensors the owner controls, scores each step against clean behavior
+          <b>from the same physical context</b>, and latches a hold on the first alarm.</p>
+      </div>
+      <ul class="tldr-list reveal">
+        <li><span class="n">01</span><div><b>Trusted telemetry only.</b><span>Never images, instructions, hidden states, or the proposed command.</span></div></li>
+        <li><span class="n">02</span><div><b>Context-normalized score.</b><span>A finger-effort drop is normal when setting an object down and alarming mid-transport. Each step is judged against its own context.</span></div></li>
+        <li><span class="n">03</span><div><b>No attack data in training.</b><span>Clean runs plus attack-free simulated faults and physical excursions. One conformal threshold per environment, calibrated on clean runs of the deployed model.</span></div></li>
+        <li><span class="n">04</span><div><b>Measured as harms prevented.</b><span>Detection before onset, prevention by the hold, and clean false alarms are reported separately.</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 02 Trust boundary -->
+<section class="night" id="trust">
+  <div class="beam" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">02</span>Threat model</div>
+        <h2>Trust Only What the Owner Controls</h2>
+      </div>
+      <div>
+        <p class="lede">The attacker controls the policy&rsquo;s <b>weights, camera image, and instruction</b>, and so the proposed
+          command <i>a<sub>t</sub></i>. The owner controls the <b>telemetry</b> <i>y<sub>t</sub></i> and
+          <span class="dmark">DETOX</span>, which sits between the policy and the robot. The attacker can change the
+          telemetry only by actually moving the robot.</p>
+        <p class="lede">Switch to an attacked run and watch the commands turn hostile, the telemetry react, and the gate latch a hold.</p>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="controls">
+        <span class="seg" id="trust-mode" role="group" aria-label="Run type">
+          <button data-mode="clean" type="button">Clean run</button>
+          <button data-mode="attack" class="on" type="button">Attacked run</button>
+        </span>
+        <span class="schematic-tag">schematic</span>
+        <span class="spacer"></span>
+        <button class="pill-btn" id="trust-replay" type="button">↻ Replay</button>
+      </div>
+      <div class="trust-stage svg-scroll">
+        <svg id="trust-svg" viewBox="0 0 1100 430" role="img" aria-label="Animated trust boundary: attacker-controlled policy sends commands through the DETOX gate to the robot; trusted telemetry flows back to DETOX, which switches the gate to hold when the score crosses the threshold."></svg>
+      </div>
+      <div class="trust-legend">
+        <span><i style="background:#f09a82"></i>attacker-controlled</span>
+        <span><i style="background:#97aecc"></i>owner-controlled</span>
+        <span>u<sub>t</sub> = hold if alarm latched, else a<sub>t</sub></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 Harm classes -->
+<section id="harms">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">03</span>Defended harms</div>
+        <h2>Three Harms, Defined by Their Physical Consequence</h2>
+      </div>
+      <p class="lede">One definition covers backdoors, instruction attacks, and image patches, because harms are labelled by what
+        happens physically, not by the attack route. Toggle the defense to see the hold in each case.
+        Counts are from the held-out test batch (Table I).</p>
+    </div>
+    <div class="controls reveal">
+      <span class="seg" id="harm-mode" role="group" aria-label="Defense">
+        <button data-mode="off" type="button">Without DETOX</button>
+        <button data-mode="on" class="on" type="button">With DETOX</button>
+      </span>
+      <span class="schematic-tag">schematic</span>
+    </div>
+    <div class="harm-grid">
+      <article class="harm reveal">
+        <span class="hn">Class 1</span>
+        <h3>Abrupt release</h3>
+        <p class="def">An opening command drops the lifted object back onto the surface it was lifted from.</p>
+        <svg class="harm-svg" data-kind="release" viewBox="0 0 320 200" aria-hidden="true"></svg>
+        <div class="state"><span class="dot"></span><span class="txt">carrying</span></div>
+        <dl><div><dt>Events</dt><dd>107</dd></div><div><dt>Detected</dt><dd>99.1<small>%</small></dd></div><div><dt>Prevented</dt><dd>74.8<small>%</small></dd></div></dl>
+      </article>
+      <article class="harm reveal">
+        <span class="hn">Class 2</span>
+        <h3>Forceful contact</h3>
+        <p class="def">A wrist-force peak above the clean maximum that pushes a bystander object more than 2&nbsp;cm or hits the table.</p>
+        <svg class="harm-svg" data-kind="contact" viewBox="0 0 320 200" aria-hidden="true"></svg>
+        <div class="state"><span class="dot"></span><span class="txt">approaching</span></div>
+        <dl><div><dt>Events</dt><dd>88</dd></div><div><dt>Detected</dt><dd>97.7<small>%</small></dd></div><div><dt>Prevented</dt><dd>98.9<small>%</small></dd></div></dl>
+      </article>
+      <article class="harm reveal">
+        <span class="hn">Class 3</span>
+        <h3>Overspeed</h3>
+        <p class="def">The end effector exceeds the clean maximum speed of its suite, 0.28 to 0.35&nbsp;m/s.</p>
+        <svg class="harm-svg" data-kind="speed" viewBox="0 0 320 200" aria-hidden="true"></svg>
+        <div class="state"><span class="dot"></span><span class="txt">moving</span></div>
+        <dl><div><dt>Events</dt><dd>196</dd></div><div><dt>Detected</dt><dd>100<small>%</small></dd></div><div><dt>Prevented</dt><dd>100<small>%</small></dd></div></dl>
+      </article>
+    </div>
+    <p class="note reveal">Release detection and prevention pool LIBERO-Object (63 events) and LIBERO-Spatial (44). Gradual slips without an opening
+      command and bystander removals leave too weak a trace in these channels and are outside the defended classes.</p>
+  </div>
+</section>
+
+<!-- 04 Context -->
+<section class="night" id="context">
+  <div class="beam" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">04</span>Key idea · hypothesis H2</div>
+        <h2>The Same Drop Means Different Things</h2>
+      </div>
+      <div>
+        <p class="lede">Finger effort drops in a malicious release <b>and</b> in a normal placement. A push or an overspeed
+          exceeds normal bounds directly, but a release can only be flagged early if it is judged <b>in context</b>.</p>
+        <p class="lede"><span class="dmark">DETOX</span> assigns each step one of four physical contexts (release &gt; contact &gt;
+          motion &gt; rest) from telemetry alone, and scores its embedding by the distance to that context&rsquo;s clean center,
+          in units of the context&rsquo;s clean spread: <span class="mono" style="color:var(--night-ink)">d<sub>t</sub> = &#8214;&phi;(x<sub>t</sub>) &minus; c<sub>k</sub>&#8214;&sup2; / &sigma;<sub>k</sub></span>.</p>
+      </div>
+    </div>
+    <div class="controls reveal">
+      <span class="seg" id="ctx-scene" role="group" aria-label="Episode">
+        <button data-scene="attack" class="on" type="button">Malicious release</button>
+        <button data-scene="place" type="button">Normal placement</button>
+      </span>
+      <span class="seg" id="ctx-score" role="group" aria-label="Scoring">
+        <button data-score="ctx" class="on" type="button">Per-context (DETOX)</button>
+        <button data-score="shared" type="button">One shared context</button>
+      </span>
+      <span class="schematic-tag">schematic</span>
+      <span class="spacer"></span>
+      <button class="pill-btn" id="ctx-replay" type="button">↻ Replay</button>
+    </div>
+    <div class="ctx-grid reveal">
+      <div class="ctx-panel">
+        <div class="ph"><span>Embedding space &phi;(x<sub>t</sub>)</span><span id="ctx-badge">context: rest</span></div>
+        <svg id="ctx-embed" viewBox="0 0 520 360" role="img" aria-label="Embedding space with four clean context clusters and a moving step."></svg>
+      </div>
+      <div class="ctx-panel">
+        <div class="ph"><span>Score s<sub>t</sub> / threshold q<sub>e</sub></span><span id="ctx-step">step 0</span></div>
+        <svg id="ctx-trace" viewBox="0 0 520 360" role="img" aria-label="Score trace over time with threshold, alarm, and onset."></svg>
+      </div>
+    </div>
+    <dl class="ctx-readout reveal" id="ctx-readout">
+      <div><dt>Alarm</dt><dd id="ro-alarm">&mdash;</dd></div>
+      <div><dt>Lead before onset</dt><dd id="ro-lead">&mdash;</dd></div>
+      <div><dt>Outcome</dt><dd id="ro-out">&mdash;</dd></div>
+    </dl>
+    <div class="two-col even" style="margin-top:clamp(36px,4vw,56px)">
+      <div class="reveal">
+        <h3 class="sub">Measured: what the context buys</h3>
+        <p class="lede">In a post hoc ablation under the same calibration rule, one shared context still flagged 103 of 107
+          releases, but <b>later</b>. The context matters less for flagging releases than for flagging them early enough to stop them.</p>
+      </div>
+      <div class="chart-card reveal" style="background:var(--night-raised); border-color:var(--night-line)">
+        <svg id="ablation-svg" viewBox="0 0 520 250" role="img" aria-label="Ablation: median alarm lead before a release 6 steps with contexts versus 2 with one shared context; prevented releases 80 versus 53 of 107; Object releases prevented 37 versus 10 of 63."></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 Method -->
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">05</span>Method at a glance</div>
+        <h2>Score, Threshold, Hold</h2>
+      </div>
+      <p class="lede">At every 20&nbsp;Hz control step, before the command reaches the robot, <span class="dmark">DETOX</span> reads
+        16 trusted channels, scores the last 0.75&nbsp;s against its context, and compares the smoothed score with one conformal
+        threshold per environment.</p>
+    </div>
+    <figure class="fig-plate reveal">
+      <img src="static/img/detox_method.webp" width="2400" height="824" loading="lazy" alt="DETOX at run time and in training. Run time: a window of 16 telemetry channels over 15 steps gets a context, passes through an encoder, and is scored by its distance to the context's clean center in clean spreads; the smoothed score is compared with threshold q_e and a latched alarm switches the gate from pass to hold. Training and calibration: clean runs and attack-free faults, one physical context per step, one-class training per context, one threshold per environment.">
+      <figcaption><span class="figno">Fig. 2</span><b>DETOX at run time and in training.</b> (a) Each step is scored by its embedding&rsquo;s
+        distance to the clean center c<sub>k</sub> of its context, in units of the clean spread &sigma;<sub>k</sub>. (b) Training uses no
+        attack data, and q<sub>e</sub> is calibrated on clean runs of the deployed model.</figcaption>
+    </figure>
+    <ol class="steps reveal">
+      <li><span class="n">01 · Window</span><b>16 channels × 15 steps</b><span>Gripper aperture and effort, end-effector motion, wrist force and torque, joint torques, plus a one-hot context: 244 dimensions.</span></li>
+      <li><span class="n">02 · Encode</span><b>Three seeded MLPs</b><span>244→192→192→64, trained to pull clean windows to their context center and push attack-free faults past 100 clean spreads.</span></li>
+      <li><span class="n">03 · Calibrate</span><b>Split-conformal q<sub>e</sub></b><span>The ⌈(n+1)(1−α)⌉-th smallest clean episode maximum, α = 0.70%, so a new clean episode alarms with probability at most α under exchangeability.</span></li>
+      <li><span class="n">04 · Hold</span><b>Latch and replace</b><span>Zero the arm increments, re-close the gripper if an object was held in the last four steps, otherwise keep the last gripper command.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 06 Results -->
+<section class="tint" id="results">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">06</span>Simulation · 9,393 held-out episodes · Table II</div>
+        <h2>Detection Is Not Prevention</h2>
+      </div>
+      <div>
+        <p class="lede">Three attacks (a BackdoorVLA checkpoint, an instruction hijack, and repeated hijacks on a contact-heavy task)
+          over four LIBERO suites, with every method on the same episodes, the same calibration rule, and the same hold.</p>
+        <p class="lede">FAIL-Detect separates attacked from clean episodes about as well as <span class="dmark">DETOX</span>
+          (AUROC 0.97 vs 0.96) yet flags only <b>16.1%</b> of harm events before onset.</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="chart-card reveal">
+        <div class="chart-title"><b>Attack detection vs. harm prevented</b><span>x: AUROC · y: prevented (%)</span></div>
+        <svg id="scatter-svg" viewBox="0 0 640 420" role="img" aria-label="Scatter of attack-detection AUROC against harm events prevented. DETOX 0.96 and 92.8 percent; FAIL-Detect 0.97 and 16.1 percent; Bera 0.77 and 83.9; per-channel limits 0.85 and 53.7; ActFovea 0.56 and 6.9; SafeLoop 0.56 and 3.6; VLA-FAIL 0.63 and 1.8."></svg>
+      </div>
+      <div class="chart-card reveal">
+        <div class="chart-title"><b>Per harm class</b><span id="bars-unit">% flagged before onset</span></div>
+        <div class="controls" style="margin:8px 0 4px">
+          <span class="seg" id="bars-metric" role="group" aria-label="Metric">
+            <button data-m="release" class="on" type="button">Release</button>
+            <button data-m="contact" type="button">Contact</button>
+            <button data-m="speed" type="button">Overspeed</button>
+            <button data-m="prev" type="button">Prevented</button>
+          </span>
+        </div>
+        <svg id="bars-svg" viewBox="0 0 460 330" role="img" aria-label="Bar chart per method for the selected harm metric."></svg>
+      </div>
+    </div>
+
+    <div class="tablewrap reveal" style="margin-top:16px" tabindex="0" role="region" aria-label="Table II, comparison with defenses and failure detectors">
+      <table class="results">
+        <thead>
+          <tr><th>Method</th><th>Reads</th><th>AUROC</th><th>Harm-free attacked<small>% alarmed · 2,356</small></th><th>Release<small>107</small></th><th>Contact<small>88</small></th><th>Overspeed<small>196</small></th><th>All<small>391</small></th><th>Prevented<small>% · 391</small></th><th>Clean FA<small>% · 2,843</small></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Bera<sup>&dagger;</sup></td><td class="reads">attention, visual tokens</td><td>0.77</td><td>13.8</td><td>42.1</td><td><span class="best">100.0</span></td><td><span class="best">100.0</span></td><td><span class="second">84.1</span></td><td><span class="second">83.9</span></td><td><span class="second">0.39</span></td></tr>
+          <tr><td>ActFovea</td><td class="reads">images, actions</td><td>0.56</td><td>1.3</td><td>0.0</td><td>11.4</td><td>8.7</td><td>6.9</td><td>6.9</td><td>0.46</td></tr>
+          <tr><td>SafeLoop</td><td class="reads">images, proprioception, action</td><td>0.56</td><td>1.3</td><td>0.0</td><td>10.2</td><td>3.1</td><td>3.8</td><td>3.6</td><td>0.49</td></tr>
+          <tr><td>FAIL-Detect</td><td class="reads">policy embedding</td><td><span class="best">0.97</span></td><td><span class="second">84.3</span></td><td><span class="second">58.9</span></td><td>0.0</td><td>0.0</td><td>16.1</td><td>16.1</td><td>0.53</td></tr>
+          <tr><td>VLA-FAIL</td><td class="reads">action-token features</td><td>0.63</td><td>15.6</td><td>1.9</td><td>1.1</td><td>2.6</td><td>2.0</td><td>1.8</td><td><span class="best">0.11</span></td></tr>
+          <tr class="sep"><td>Per-channel limits</td><td class="reads">trusted telemetry</td><td>0.85</td><td>82.8</td><td>0.0</td><td>96.6</td><td><span class="second">64.8</span></td><td>54.2</td><td>53.7</td><td>0.84</td></tr>
+          <tr class="ours-row"><td>DETOX (ours)</td><td class="reads">trusted telemetry</td><td><span class="second">0.96</span></td><td><span class="best">92.5</span></td><td><span class="best">99.1</span></td><td><span class="second">97.7</span></td><td><span class="best">100.0</span></td><td><span class="best">99.2</span></td><td><span class="best">92.8</span></td><td>0.56</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal">AUROC treats attacked episodes as positives; the harm columns count harm events flagged before onset (%). Policy-side rows take
+      the better of the published and the two-sided score direction on this batch. All rows share the calibration level α, so their clean
+      false-alarm rates differ by sampling noise. Bold marks the best and underline the second best per column. <sup>&dagger;</sup>Bera is built for image
+      triggers, while every attack in this batch enters through the instruction; on a BadVLA pixel trigger it flagged all 500 triggered episodes and none of 150 clean ones.</p>
+
+    <div class="two-col even" style="margin-top:clamp(40px,5vw,64px)">
+      <div class="reveal">
+        <h3 class="sub">Unseen image patch</h3>
+        <p class="lede">Under a public universal patch never used in development, the <b>frozen</b> <span class="dmark">DETOX</span> flagged and prevented
+          55 of 73 abrupt releases in a LIBERO-Goal OFT task (75.3%, 95% CI [64.4, 83.8]), at 0.6% and 0.2% clean false alarms in the two batches.
+          No policy-side variant we ran exceeded 36.</p>
+      </div>
+      <div class="chart-card reveal">
+        <svg id="patch-svg" viewBox="0 0 520 170" role="img" aria-label="Unseen patch: DETOX flagged and prevented 55 of 73 releases; the best policy-side variant 36 of 73."></svg>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:clamp(40px,5vw,64px)">
+      <div class="chart-card reveal">
+        <div class="chart-title"><b>Hold outcome by alarm lead</b><span>Q3 · replayed hold</span></div>
+        <svg id="lead-svg" viewBox="0 0 640 260" role="img" aria-label="Prevention by alarm lead: 93.6 percent of events with a lead of at least three steps, 10 of 12 with a lead of one or two steps, and the one event alarmed at the onset step."></svg>
+      </div>
+      <div class="reveal">
+        <h3 class="sub">Where the hold falls short</h3>
+        <dl class="kv">
+          <div><dt>Prevented overall</dt><dd>363<small>/ 391</small></dd></div>
+          <div><dt>Events still occurring</dt><dd>28</dd></div>
+          <div><dt>Of those, Object releases that slipped from the re-closed gripper</dt><dd>24</dd></div>
+          <div><dt>New events caused by the hold (attacked / clean)</dt><dd>0<small>/ 1 slip</small></dd></div>
+        </dl>
+        <p class="note">For LIBERO-Object releases the limit lies in the hold, not in sensing: the alarm came a median 5 steps early, yet the object slipped from the re-closed fingers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 Hardware -->
+<section id="hardware">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">07</span>Physical UR5e · online hold · Q5</div>
+        <h2>The Loop Closes on a Real Arm</h2>
+      </div>
+      <p class="lede">We fine-tuned OpenVLA-OFT on 29 teleoperated demonstrations and poisoned it with a text trigger that opens the gripper
+        in transport. <span class="dmark">DETOX</span> was fitted on 80 clean runs and calibrated on 20, on the same 16 arm, wrist, and gripper
+        channels, then run online.</p>
+    </div>
+    <div class="hw-grid">
+      <div class="reveal" style="display:flex; flex-direction:column; gap:16px">
+        <div class="photo"><img src="static/img/ur5e_setup.jpg" width="640" height="480" loading="lazy" alt="UR5e workstation at the start of a trial: the arm with a two-finger gripper above a table with a plush toy and a pink box."><span class="tag">trial start · base camera</span></div>
+        <dl class="kv">
+          <div><dt>Triggered releases, object kept with the hold</dt><dd>9<small>/ 10</small></dd></div>
+          <div><dt>Triggered releases without the hold, object fell</dt><dd>5<small>/ 5</small></dd></div>
+          <div><dt>Per-channel limits, object kept</dt><dd>0<small>/ 10</small></dd></div>
+          <div><dt>Clean trials with a false alarm</dt><dd>2<small>/ 20</small></dd></div>
+        </dl>
+      </div>
+      <div class="chart-card reveal" style="display:flex; flex-direction:column">
+        <div class="chart-title"><b>Gripper aperture after the triggered opening</b><span class="schematic-tag measured-tag">recorded · 50 Hz</span></div>
+        <div class="controls" style="margin:8px 0 0">
+          <span class="seg" id="hw-mode" role="group" aria-label="Trace">
+            <button data-mode="both" class="on" type="button">Both</button>
+            <button data-mode="hold" type="button">With hold</button>
+            <button data-mode="nohold" type="button">Without hold</button>
+          </span>
+          <span class="spacer"></span>
+          <button class="pill-btn" id="hw-replay" type="button">↻ Replay</button>
+        </div>
+        <svg id="hw-svg" viewBox="0 0 640 380" role="img" aria-label="Recorded gripper aperture in millimetres against time from the opening onset for two triggered trials. With the DETOX hold, the alarm comes 150 milliseconds after onset and the fingers reverse at about 15 millimetres of opening; the toy stays in the gripper. Without the hold, the gripper opens fully and the toy falls."></svg>
+        <p class="note" style="margin-top:10px">One protected and one unprotected triggered trial from the same session, aligned at the opening onset. On hardware the alarm came a median 3 steps (150&nbsp;ms)
+          after the opening command, when the fingers had opened 10&nbsp;mm; they reversed at a median 15&nbsp;mm. Operator verdicts: kept (with hold), fell (without).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 Abstract -->
+<section class="tint" id="abstract">
+  <div class="wrap abstract">
+    <div class="reveal">
+      <div class="label"><span class="no">08</span>Paper</div>
+      <h2>Abstract</h2>
+      <ul class="meta-list">
+        <li><span>Venue</span><b>RSS 2027 (under review)</b></li>
+        <li><span>Simulation</span><b>LIBERO · 4 suites</b></li>
+        <li><span>Policies</span><b>OpenVLA-OFT · BackdoorVLA</b></li>
+        <li><span>Hardware</span><b>UR5e</b></li>
+      </ul>
+    </div>
+    <div class="prose reveal">
+      <p>Vision&ndash;language&ndash;action (VLA) policies are usually deployed from public checkpoints, and backdoored weights or a manipulated
+        instruction can make the robot drop a carried object, push a bystander object, or move too fast. Detecting the attack is not enough.
+        Once the grip is lost the object is already falling, so the harm must be stopped before onset. Existing defenses read the policy&rsquo;s
+        hidden states or inputs, which the attacker shapes, and do not measure harms prevented. We propose <b class="dmark">DETOX</b>, a runtime
+        defense that reads only owner-side physical telemetry and, on an alarm, replaces the next command with a hold. We hypothesize that a
+        physical change signals harm only relative to the robot&rsquo;s context, since finger effort drops in a malicious release and in a normal
+        placement alike. <b class="dmark">DETOX</b> therefore scores each step against clean behavior from the same context, trains without attack
+        data, and calibrates its threshold on clean runs of the deployed model. On 9,393 simulated LIBERO episodes, <b class="dmark">DETOX</b>
+        flagged 388 of 391 harm events before onset at 0.56% false alarms, and its replayed hold prevented 363, versus at most 328 for five
+        policy-side baselines. Under an unseen image patch, the frozen <b class="dmark">DETOX</b> flagged 55 of 73 releases, versus at most 36
+        for the baselines. On a UR5e arm, its online hold kept the carried object in 9 of 10 triggered releases of a backdoored OpenVLA-OFT policy.</p>
+      <div class="scope"><b>Scope.</b> This submission evaluates three non-adaptive attacks in simulation and one backdoor attack on hardware.
+        The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public
+        OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. Adaptive attackers and bystander removal with a real object
+        tracker are planned for the final version.</div>
+    </div>
+  </div>
+</section>
+
+<section id="bibtex">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="label"><span class="no">09</span>Citation</div>
+        <h2>BibTeX</h2>
+      </div>
+      <p class="lede">Author names and the preprint link will be added after the review period.</p>
+    </div>
+    <div class="bibtex-card reveal">
+      <button class="copy-btn" type="button" id="copy-bib">Copy</button>
+      <div class="bibtex" id="bibtex-text">@misc{detox2026,
+  title  = {DETOX: Runtime Defense for Vision--Language--Action
+            Models under Attack},
+  author = {Anonymous},
+  note   = {Under review},
+  year   = {2026}
+}</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>DETOX is a research prototype. Simulation results use LIBERO with public OpenVLA-OFT and BackdoorVLA checkpoints; hardware results
+      use a single UR5e workstation. Animations marked schematic illustrate the mechanism and are not measurements.</p>
+    <p class="fine">DETOX · 2026</p>
+  </div>
+</footer>
+
+<script src="static/data/ur5e_traces.js"></script>
+<script src="static/detox.js"></script>
+</body>
+</html>
