@@ -337,7 +337,7 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
   .hero-copy > *:nth-child(4){animation-delay:.3s}
   .hero-copy > *:nth-child(5){animation-delay:.4s}
   .hero-copy > *:nth-child(n+6){animation-delay:.5s}
-  .brand-hero span{display:inline-block; animation:mask-up 1.25s var(--ease-out-brand) both}
+  .brand-hero span{display:inline-block; padding-right:.1em; animation:mask-up 1.25s var(--ease-out-brand) both}
   .hero-art{animation:enter 1.3s .25s var(--ease-out-brand) both}
   .orbit{transform-box:view-box; transform-origin:280px 250px; animation:spin 26s linear infinite}
   .orbit.slow{animation-duration:29s; animation-direction:reverse}
@@ -347,7 +347,7 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
   .js .reveal.in{opacity:1; transform:none; filter:none}
 }
 @keyframes enter{from{opacity:0; transform:translateY(14px); filter:blur(6px)}to{opacity:1; transform:none; filter:none}}
-@keyframes mask-up{from{clip-path:inset(0 0 100% 0); transform:translateY(.3em)}to{clip-path:inset(0 0 -10% 0); transform:none}}
+@keyframes mask-up{from{clip-path:inset(0 -20% 100% -5%); transform:translateY(.3em)}to{clip-path:inset(-10% -20% -10% -5%); transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes beam{from{left:-40%}to{left:120%}}
 @media (prefers-reduced-motion:reduce){
