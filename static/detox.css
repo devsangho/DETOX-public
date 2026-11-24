@@ -49,6 +49,7 @@ svg text{font-family:var(--font-latin)}
 .site-nav .nav-cta{color:#fff; background:var(--ink); padding:8px 14px; border-radius:3px; font-size:13px;
   transition:background .25s var(--ease-out-brand), box-shadow .25s var(--ease-out-brand)}
 .site-nav .nav-cta:hover{color:#fff; background:var(--blue); box-shadow:0 6px 20px rgba(63,88,118,.28)}
+.site-nav .nav-cta.off{color:var(--faint); background:transparent; border:1px dashed var(--line-strong); cursor:not-allowed; box-shadow:none}
 .progress{position:absolute; left:0; bottom:-1px; height:2px; width:100%; background:var(--signal);
   transform-origin:0 50%; transform:scaleX(0)}
 @media(max-width:900px){.site-nav a:not(.nav-cta){display:none}}
