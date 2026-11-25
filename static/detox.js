@@ -59,9 +59,11 @@
   }
   function onSeg(id, cb) {
     const g = document.getElementById(id); if (!g) return;
-    g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-      g.querySelectorAll('button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on'); cb(b.dataset);
+    const bs = g.querySelectorAll('button');
+    bs.forEach(b => b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false'));
+    bs.forEach(b => b.addEventListener('click', () => {
+      bs.forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
+      b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); cb(b.dataset);
     }));
   }
 
@@ -89,7 +91,7 @@
     }), { threshold: 0.4 });
     nums.forEach(n => cio.observe(n));
     const cb = document.getElementById('copy-bib');
-    if (cb) cb.addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('bibtex-text').innerText).then(() => { cb.textContent = 'Copied!'; setTimeout(() => cb.textContent = 'Copy', 1600); }));
+    if (cb) cb.addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('bibtex-text').innerText).then(() => { cb.textContent = 'Copied'; setTimeout(() => cb.textContent = 'Copy', 1600); }));
   })();
 
   /* ---------- stat band: faint telemetry traces ---------- */
@@ -97,7 +99,7 @@
     const cv = document.getElementById('stat-canvas'); if (!cv) return;
     const ctx = cv.getContext('2d');
     let w, h, visible = false, raf;
-    function size() { const r = cv.getBoundingClientRect(); w = cv.width = Math.round(r.width * devicePixelRatio); h = cv.height = Math.round(r.height * devicePixelRatio); }
+    function size() { const r = cv.getBoundingClientRect(); /* devicePixelRatio aware, redrawn on resize */ w = cv.width = Math.round(r.width * devicePixelRatio); h = cv.height = Math.round(r.height * devicePixelRatio); }
     size(); addEventListener('resize', size);
     const lanes = [
       { y: .22, a: .05, f: 2.1, c: 'rgba(151,174,204,.35)' }, { y: .45, a: .07, f: 1.3, c: 'rgba(151,174,204,.22)' },
@@ -114,7 +116,8 @@
         ctx.stroke();
       });
     }
-    function loop(ts) { draw(ts / 1000); if (visible) raf = requestAnimationFrame(loop); }
+    function loop(ts) { draw(ts / 1000); if (visible && !document.hidden) raf = requestAnimationFrame(loop); }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) raf = requestAnimationFrame(loop); });
     if (RM) { draw(0); return; }
     new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting; if (visible) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf); })).observe(cv);
   })();
@@ -147,8 +150,8 @@
   /* ---------- hero: carry, trigger, alarm, hold ---------- */
   (function () {
     const svg = document.getElementById('hero-svg'); if (!svg) return;
-    const orb1 = el('g', { class: 'orbit' }, svg); el('ellipse', { cx: 280, cy: 250, rx: 255, ry: 120, stroke: C.blueL, 'stroke-opacity': .4, transform: 'rotate(-20 280 250)' }, orb1);
-    const orb2 = el('g', { class: 'orbit slow' }, svg); el('ellipse', { cx: 280, cy: 250, rx: 215, ry: 72, stroke: C.blueL, 'stroke-opacity': .26, 'stroke-dasharray': '2 6', transform: 'rotate(16 280 250)' }, orb2);
+    const orb1 = el('g', { class: 'orbit' }, svg); el('ellipse', { cx: 280, cy: 250, rx: 255, ry: 120, stroke: C.blueL, 'stroke-opacity': .45, transform: 'rotate(-20 280 250)' }, orb1);
+    const orb2 = el('g', { class: 'orbit slow' }, svg); el('ellipse', { cx: 280, cy: 250, rx: 215, ry: 72, stroke: C.blueL, 'stroke-opacity': .28, 'stroke-dasharray': '2 6', transform: 'rotate(16 280 250)' }, orb2);
     // table
     el('line', { x1: 60, y1: 352, x2: 500, y2: 352, stroke: C.ink, 'stroke-opacity': .22, 'stroke-width': 1.5 }, svg);
     for (let i = 0; i < 12; i++) el('line', { x1: 70 + i * 38, y1: 352, x2: 60 + i * 38, y2: 362, stroke: C.ink, 'stroke-opacity': .12 }, svg);
@@ -166,13 +169,21 @@
     const box = el('rect', { width: 40, height: 40, rx: 6, fill: C.peach, stroke: C.coralD, 'stroke-width': 1.5 }, svg);
     const grip = makeGripper(svg, 1);
     const r1 = ring(svg, C.blue), r2 = ring(svg, C.blue);
+    // problem path: where the object would fall without the hold (coral, dashed)
+    const fallPath = el('path', { stroke: C.coral, 'stroke-width': 1.6, 'stroke-dasharray': '4 4', 'stroke-linecap': 'butt', opacity: 0 }, svg);
+    const fallDot = el('rect', { width: 40, height: 40, rx: 6, fill: 'none', stroke: C.coral, 'stroke-width': 1.2, 'stroke-dasharray': '4 4', opacity: 0 }, svg);
+    // ring pulse nodes at the hold (CSS keyframes 'ring', 4.4 s, 1.4 s apart)
+    const nodes = el('g', { visibility: 'hidden' }, svg);
+    el('circle', { class: 'ring', r: 6, fill: 'none', stroke: C.blue, 'stroke-width': 1.5 }, nodes);
+    el('circle', { class: 'ring d2', r: 6, fill: 'none', stroke: C.blue, 'stroke-width': 1.5 }, nodes);
+    el('circle', { r: 5, fill: '#fff', stroke: C.blue, 'stroke-width': 2 }, nodes);
     const holdTag = el('g', { opacity: 0 }, svg);
     el('rect', { x: -38, y: -14, width: 76, height: 26, rx: 13, fill: C.blue }, holdTag);
     el('text', { x: 0, y: 4, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#fff', 'letter-spacing': '.08em', text: 'HOLD' }, holdTag);
     // score sparkline
     const sx0 = 70, sx1 = 490, sy0 = 470, sy1 = 392, q = 0.62;
     el('text', { x: sx0, y: 386, 'font-size': 10.5, 'font-family': 'Geist Mono, monospace', fill: C.muted, 'letter-spacing': '.08em', text: 'SCORE sₜ' }, svg);
-    el('line', { x1: sx0, y1: lerp(sy0, sy1, q), x2: sx1, y2: lerp(sy0, sy1, q), stroke: C.muted, 'stroke-dasharray': '4 4', 'stroke-width': 1.2 }, svg);
+    el('line', { x1: sx0, y1: lerp(sy0, sy1, q), x2: sx1, y2: lerp(sy0, sy1, q), stroke: C.muted, 'stroke-dasharray': '3 4', 'stroke-width': 1.2 }, svg);
     el('text', { x: sx1, y: lerp(sy0, sy1, q) - 6, 'text-anchor': 'end', 'font-size': 10.5, 'font-family': 'Geist Mono, monospace', fill: C.muted, text: 'qₑ' }, svg);
     el('line', { x1: sx0, y1: sy0, x2: sx1, y2: sy0, stroke: C.line }, svg);
     const spark = el('path', { stroke: C.blue, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
@@ -215,6 +226,11 @@
       set(link, { stroke: attacked ? C.coral : C.faint });
       pulse(r1, t, tAlarm, xMove, y + 10, 70); pulse(r2, t, tAlarm + .35, xMove, y + 10, 70);
       holdTag.setAttribute('transform', 'translate(' + xMove + ' ' + (y - 98) + ')');
+      const fk = t > tTrig + .2 ? ease(seg(t, tTrig + .2, tTrig + .9)) : 0;
+      set(fallPath, { d: 'M' + xMove + ' ' + (y + 34) + ' Q ' + (xMove + 30) + ' ' + (y + 60) + ' ' + (xMove + 46) + ' 312', opacity: fk * .9 });
+      set(fallDot, { x: xMove + 26, y: 312, opacity: fk * .8 });
+      nodes.setAttribute('transform', 'translate(' + xMove + ' ' + (y + 10) + ')');
+      nodes.setAttribute('visibility', t >= tAlarm + .9 ? 'visible' : 'hidden');
       holdTag.setAttribute('opacity', held ? ease(seg(t, tAlarm, tAlarm + .3)) : 0);
       // spark
       const tt = Math.min(t, D - .5); let d = '';
@@ -226,10 +242,10 @@
       set(onsetL, { x1: ox, x2: ox, opacity: showO * .9 }); set(onsetT, { x: ox + 4, opacity: showO, text: 'onset avoided' });
       svg.style.opacity = fade < 1 ? fade.toFixed(3) : '';
     }
-    player(svg, D, render, { loop: true, still: 5 });
+    player(svg, 6.2, render);
   })();
 
-  /* ---------- replay video wall: load and play only while on screen ---------- */
+  /* ---------- replay video wall: load and play only while on screen (V-03), lightbox on click (V-05) ---------- */
   (function () {
     const vids = document.querySelectorAll('.vbox video'); if (!vids.length) return;
     const io = new IntersectionObserver(es => es.forEach(e => {
@@ -238,6 +254,32 @@
       else v.pause();
     }), { rootMargin: '150px', threshold: 0.2 });
     vids.forEach(v => { if (RM) v.controls = true; io.observe(v); });
+    const lb = document.getElementById('lightbox'), lbv = document.getElementById('lb-video'), lbt = document.getElementById('lb-title');
+    if (!lb) return;
+    const meta = {}; (window.DETOX_VIDEOS || []).forEach(m => { meta[m.slug] = m; });
+    let from = null;
+    function open(tile) {
+      const v = tile.querySelector('video'), m = meta[tile.dataset.slug] || {};
+      from = tile;
+      lbv.src = v.currentSrc || v.dataset.src;
+      try { lbv.currentTime = v.currentTime || 0; } catch (e) { /* not seekable yet */ }
+      lbt.textContent = [m.harm, m.scene, m.lead_steps != null ? 'alarm ' + m.lead_steps + ' steps before onset' : ''].filter(Boolean).join(' · ');
+      lb.classList.add('open'); document.body.style.overflow = 'hidden';
+      lbv.play().catch(() => {});
+      document.getElementById('lb-close').focus();
+    }
+    function close() {
+      lb.classList.remove('open'); document.body.style.overflow = '';
+      lbv.pause(); lbv.removeAttribute('src'); lbv.load();
+      if (from) from.focus();
+    }
+    document.querySelectorAll('.vtile').forEach(t => {
+      t.addEventListener('click', () => open(t));
+      t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(t); } });
+    });
+    document.getElementById('lb-close').addEventListener('click', close);
+    lb.addEventListener('click', e => { if (e.target === lb) close(); });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) close(); });
   })();
 
   /* ---------- 01: detection vs prevention timeline ---------- */
@@ -260,7 +302,7 @@
       el('text', { x: 20, y: r.y - 4, 'font-size': 16, 'font-weight': 600, fill: i === 2 ? C.blue : C.ink, text: r.name }, svg);
       el('text', { x: 20, y: r.y + 16, 'font-size': 12.5, fill: C.muted, text: r.sub }, svg);
       el('line', { x1: X0, x2: X1, y1: r.y, y2: r.y, stroke: C.line, 'stroke-width': 6, 'stroke-linecap': 'round' }, svg);
-      const prog = el('line', { x1: X0, y1: r.y, y2: r.y, stroke: i === 2 ? C.blue : C.coral, 'stroke-width': 6, 'stroke-linecap': 'round' }, svg);
+      const prog = el('line', { x1: X0, y1: r.y, y2: r.y, stroke: C.coral, 'stroke-width': 6, 'stroke-dasharray': '4 4' }, svg);
       const holdBar = el('line', { y1: r.y, y2: r.y, stroke: C.blue, 'stroke-width': 6, 'stroke-linecap': 'round', opacity: 0 }, svg);
       const mk = r.alarm ? el('g', { opacity: 0 }, svg) : null;
       if (mk) {
@@ -283,8 +325,7 @@
       set(head, { x1: X(f), x2: X(f) });
       R.forEach(o => {
         const stop = o.r.kept ? tAlarm : 2;
-        set(o.prog, { x2: X(Math.min(f, stop)), stroke: o.i === 2 ? C.coral : C.coral, opacity: f > tTrig ? 1 : .35 });
-        set(o.prog, { stroke: f < tTrig ? C.slate : C.coral });
+        set(o.prog, { x2: X(Math.min(f, stop)), stroke: f < tTrig ? C.slate : C.coral, 'stroke-dasharray': f < tTrig ? 'none' : '4 4' });
         if (o.r.kept) set(o.holdBar, { x1: X(tAlarm), x2: X(Math.max(tAlarm, f)), opacity: f > tAlarm ? 1 : 0 });
         if (o.mk) o.mk.setAttribute('opacity', f >= o.r.alarm ? 1 : 0);
         if (o.r.alarm) pulse(o.rg, f * 5, o.r.alarm * 5, X(o.r.alarm), o.r.y, 30);
@@ -308,9 +349,9 @@
     let mode = 'attack';
     const mono = 'Geist Mono, monospace';
     // zones
-    el('rect', { x: 20, y: 30, width: 390, height: 270, rx: 18, fill: 'rgba(240,154,130,.05)', stroke: C.nCoral, 'stroke-opacity': .55, 'stroke-dasharray': '6 6' }, svg);
+    el('rect', { x: 20, y: 30, width: 390, height: 270, rx: 18, fill: 'rgba(240,154,130,.05)', stroke: C.nCoral, 'stroke-opacity': .55, 'stroke-dasharray': '2 3' }, svg);
     el('text', { x: 40, y: 56, 'font-size': 11.5, 'font-family': mono, fill: C.nCoral, 'letter-spacing': '.14em', text: 'ATTACKER CONTROLS' }, svg);
-    el('rect', { x: 440, y: 30, width: 640, height: 385, rx: 18, fill: 'rgba(151,174,204,.04)', stroke: C.nBlue, 'stroke-opacity': .5, 'stroke-dasharray': '6 6' }, svg);
+    el('rect', { x: 440, y: 30, width: 640, height: 385, rx: 18, fill: 'rgba(151,174,204,.04)', stroke: C.nBlue, 'stroke-opacity': .5, 'stroke-dasharray': '2 3' }, svg);
     el('text', { x: 460, y: 56, 'font-size': 11.5, 'font-family': mono, fill: C.nBlue, 'letter-spacing': '.14em', text: 'OWNER CONTROLS' }, svg);
     // attacker inputs
     const inputs = ['weights', 'camera image', 'instruction'].map((lab, i) => {
@@ -345,13 +386,13 @@
     el('text', { x: 800, y: 165, 'text-anchor': 'middle', 'font-size': 13, 'font-family': mono, fill: C.nMuted, text: 'uₜ' }, svg);
     // telemetry loop
     const telPath = 'M965 245 V 300 H 620 V 235';
-    el('path', { d: telPath, stroke: C.nBlue, 'stroke-opacity': .45, 'stroke-width': 1.6, 'stroke-dasharray': '5 5' }, svg);
+    el('path', { d: telPath, stroke: C.nBlue, 'stroke-opacity': .45, 'stroke-width': 1.2, 'stroke-dasharray': '2 3' }, svg);
     el('text', { x: 792, y: 292, 'text-anchor': 'middle', 'font-size': 12.5, 'font-family': mono, fill: C.nBlue, text: 'trusted telemetry yₜ · gripper, wrist F/T, joints' }, svg);
     // score chart
     const gx0 = 470, gx1 = 1050, gy0 = 395, gy1 = 325, q = .7;
     el('text', { x: gx0, y: 318, 'font-size': 11, 'font-family': mono, fill: C.nMuted, 'letter-spacing': '.1em', text: 'SCORE sₜ' }, svg);
     el('line', { x1: gx0, x2: gx1, y1: gy0, y2: gy0, stroke: C.nLine }, svg);
-    el('line', { x1: gx0, x2: gx1, y1: lerp(gy0, gy1, q), y2: lerp(gy0, gy1, q), stroke: C.nMuted, 'stroke-dasharray': '4 4' }, svg);
+    el('line', { x1: gx0, x2: gx1, y1: lerp(gy0, gy1, q), y2: lerp(gy0, gy1, q), stroke: C.nMuted, 'stroke-dasharray': '3 4', 'stroke-width': 1.2 }, svg);
     el('text', { x: gx1, y: lerp(gy0, gy1, q) - 5, 'text-anchor': 'end', 'font-size': 11, 'font-family': mono, fill: C.nMuted, text: 'qₑ' }, svg);
     const sc = el('path', { stroke: C.nBlue, 'stroke-width': 2, 'stroke-linejoin': 'round' }, svg);
     const alarmMk = el('g', { opacity: 0 }, svg);
@@ -411,7 +452,7 @@
       const ax = lerp(gx0, gx1, tAl / D);
       alarmMk.setAttribute('opacity', held ? 1 : 0); set(alarmLine, { x1: ax, x2: ax }); set(alarmTx, { x: ax + 6 });
     }
-    const p = player(svg, D, render, { loop: true, still: 7 });
+    const p = player(svg, D - .4, render);
     onSeg('trust-mode', d => { mode = d.mode; p.replay(); });
     const rb = document.getElementById('trust-replay'); if (rb) rb.addEventListener('click', () => p.replay());
   })();
@@ -466,7 +507,7 @@
         // force meter
         el('text', { x: 20, y: 26, 'font-size': 9.5, 'font-family': 'Geist Mono, monospace', fill: C.muted, text: 'WRIST FORCE' }, svg);
         el('rect', { x: 20, y: 34, width: 120, height: 7, rx: 3.5, fill: 'rgba(16,20,27,.08)' }, svg);
-        el('line', { x1: 20 + 120 * .62, x2: 20 + 120 * .62, y1: 30, y2: 45, stroke: C.muted, 'stroke-dasharray': '2 2' }, svg);
+        el('line', { x1: 20 + 120 * .62, x2: 20 + 120 * .62, y1: 30, y2: 45, stroke: C.muted, 'stroke-dasharray': '2 3' }, svg);
         const fbar = el('rect', { x: 20, y: 34, height: 7, rx: 3.5, fill: C.blueL }, svg);
         render = t => {
           const bx = 196, tCont = 1.5, tAl = 1.45;
@@ -495,7 +536,7 @@
         el('line', { x1: 0, y1: 0, x2: 62, y2: 0, stroke: C.body, 'stroke-width': 7, 'stroke-linecap': 'round' }, a2);
         el('circle', { r: 5.5, fill: '#fff', stroke: C.body, 'stroke-width': 2 }, a2);
         const eff = el('circle', { cx: 62, cy: 0, r: 6, fill: C.ink }, a2);
-        const trail = el('path', { stroke: C.coral, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: .6 }, svg);
+        const trail = el('path', { stroke: C.coral, 'stroke-width': 2, 'stroke-linecap': 'butt', opacity: .8 }, svg);
         // speed gauge
         const gx = 250, gy = 92, gr = 40;
         el('path', { d: 'M' + (gx - gr) + ' ' + gy + ' A ' + gr + ' ' + gr + ' 0 0 1 ' + (gx + gr) + ' ' + gy, stroke: 'rgba(16,20,27,.12)', 'stroke-width': 7 }, svg);
@@ -521,7 +562,7 @@
           const ex = 96 + Math.sin(r1) * 70 + Math.cos(r2) * 62, ey = 172 - Math.cos(r1) * 70 + Math.sin(r2) * 62;
           hist.push([ex, ey, t]); while (hist.length && t - hist[0][2] > .35) hist.shift();
           if (t < .02) hist.length = 0;
-          set(trail, { d: hist.length > 1 ? 'M' + hist.map(h => h[0].toFixed(1) + ' ' + h[1].toFixed(1)).join('L') : '', stroke: sp > lim ? C.coral : C.blueL });
+          set(trail, { d: hist.length > 1 ? 'M' + hist.map(h => h[0].toFixed(1) + ' ' + h[1].toFixed(1)).join('L') : '', stroke: sp > lim ? C.coral : C.blueL, 'stroke-dasharray': sp > lim ? '4 4' : 'none', 'stroke-width': sp > lim ? 1.6 : 2 });
           const s = clamp(sp, 0, 1), na = Math.PI * (1 - s);
           set(needle, { x2: gx + (gr - 8) * Math.cos(na), y2: gy - (gr - 8) * Math.sin(na), stroke: s > lim ? C.coralD : C.ink });
           if (defended) { pulse(rg, t, tAl, ex, ey, 40); pulse(rg2, t, tAl + .3, ex, ey, 40); }
@@ -531,7 +572,7 @@
           else setState('', t > 1.1 ? 'accelerating' : 'moving');
         };
       }
-      players.push(player(svg, D, render, { loop: true, still: 3.6 }));
+      players.push(player(svg, D, render));
     });
     onSeg('harm-mode', d => { defended = d.mode === 'on'; players.forEach(p => p.replay()); });
   })();
@@ -551,12 +592,12 @@
     const rnd = mulberry(11);
     const gauss = () => { let u = 0; for (let i = 0; i < 4; i++) u += rnd(); return (u - 2) / .58; };
     const ringEls = {};
-    const shared = el('circle', { cx: G.c[0], cy: G.c[1], r: G.r, fill: 'none', stroke: C.nMuted, 'stroke-dasharray': '3 6', opacity: 0 }, emb);
+    const shared = el('circle', { cx: G.c[0], cy: G.c[1], r: G.r, fill: 'none', stroke: C.nMuted, 'stroke-dasharray': '2 3', 'stroke-width': 1.2, opacity: 0 }, emb);
     const sharedLab = el('text', { x: G.c[0] + G.r * .72, y: G.c[1] - G.r * .72, 'font-size': 11, 'font-family': mono, fill: C.nMuted, opacity: 0, text: 'one shared spread' }, emb);
     Object.entries(CL).forEach(([k, o]) => {
       const g = el('g', null, emb);
       for (let i = 0; i < 26; i++) { const a = rnd() * 6.283, d = Math.abs(gauss()) * o.r * .42; el('circle', { cx: o.c[0] + Math.cos(a) * d, cy: o.c[1] + Math.sin(a) * d, r: 2.2, fill: o.col, opacity: .55 }, g); }
-      const rr = el('circle', { cx: o.c[0], cy: o.c[1], r: o.r, fill: 'none', stroke: o.col, 'stroke-width': 1.4, 'stroke-dasharray': '4 4', opacity: .6 }, g);
+      const rr = el('circle', { cx: o.c[0], cy: o.c[1], r: o.r, fill: 'none', stroke: o.col, 'stroke-width': 1.2, 'stroke-dasharray': '2 3', opacity: .6 }, g);
       el('circle', { cx: o.c[0], cy: o.c[1], r: 3, fill: C.nInk }, g);
       el('text', { x: o.c[0], y: o.c[1] - o.r - 8, 'text-anchor': 'middle', 'font-size': 12, 'font-family': mono, fill: C.nBody, text: o.lab + ' cₖ' }, g);
       ringEls[k] = rr;
@@ -604,7 +645,7 @@
     const X0 = 46, X1 = 500, Y0 = 300, Y1 = 40, SMAX = 2.2;
     const xs = s => lerp(X0, X1, s / (NSTEP - 1)), ys = v => lerp(Y0, Y1, Math.min(v, SMAX) / SMAX);
     el('line', { x1: X0, x2: X1, y1: Y0, y2: Y0, stroke: C.nLine }, tr);
-    el('line', { x1: X0, x2: X1, y1: ys(1), y2: ys(1), stroke: C.nMuted, 'stroke-dasharray': '5 5' }, tr);
+    el('line', { x1: X0, x2: X1, y1: ys(1), y2: ys(1), stroke: C.nMuted, 'stroke-dasharray': '3 4', 'stroke-width': 1.2 }, tr);
     el('text', { x: X0 - 8, y: ys(1) + 4, 'text-anchor': 'end', 'font-size': 11, 'font-family': mono, fill: C.nMuted, text: 'qₑ' }, tr);
     el('text', { x: X0 - 8, y: Y0 + 4, 'text-anchor': 'end', 'font-size': 11, 'font-family': mono, fill: C.nMuted, text: '0' }, tr);
     const ctxBand = el('g', null, tr);
@@ -674,6 +715,9 @@
 
   /* ---------- animated bar helper ---------- */
   function onView(target, fn) {
+    const card = target.closest('.chart-card');
+    const rb = card && card.querySelector('.pill-btn[data-replay]');
+    if (rb) rb.addEventListener('click', () => { fn(false); fn(false, true); });
     if (RM) { fn(true); return; }
     fn(false);
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.disconnect(); fn(false, true); } }), { threshold: .3 });
@@ -777,7 +821,7 @@
       const from = R.map(o => o.cur), to = V[metric];
       tween(anim ? 900 : 0, k => R.forEach((o, i) => { const v = lerp(from[i], to[i], k); o.cur = v; const w = (X1 - X0) * v / 100; set(o.r, { width: Math.max(0, w) }); set(o.tx, { x: X0 + w + 6, text: v.toFixed(1) }); }));
     }
-    onView(svg, (now, start) => { if (now || start) go(!now); });
+    onView(svg, (now, start) => { if (!now && !start) { R.forEach(o => { o.cur = 0; set(o.r, { width: 0 }); set(o.tx, { x: X0 + 6, text: '0.0' }); }); return; } go(!now); });
     onSeg('bars-metric', d => { metric = d.m; go(true); });
   })();
 
@@ -827,7 +871,7 @@
 
   /* ---------- 07: UR5e recorded gripper traces ---------- */
   (function () {
-    const svg = document.getElementById('hw-svg'); const T = window.UR5E_TRACES; if (!svg || !T) return;
+    const svg = document.getElementById('hw-svg'); const T = window.DETOX_DATA && window.DETOX_DATA.ur5e_traces; if (!svg || !T) return;
     const mono = 'Geist Mono, monospace';
     const X0 = 56, X1 = 620, Y0 = 320, Y1 = 30, TMIN = -100, TMAX = 3050, AMAX = 90;
     const xs = t => lerp(X0, X1, (t - TMIN) / (TMAX - TMIN)), ys = a => lerp(Y0, Y1, a / AMAX);
@@ -838,8 +882,8 @@
     el('line', { x1: xs(0), x2: xs(0), y1: Y1, y2: Y0, stroke: C.coralD, 'stroke-dasharray': '3 4' }, svg);
     el('text', { x: xs(0) + 5, y: Y1 + 10, 'font-size': 11, 'font-family': mono, fill: C.coralD, text: 'opening onset' }, svg);
     const L = {
-      nohold: el('path', { stroke: C.coral, 'stroke-width': 2.4, 'stroke-linejoin': 'round' }, svg),
-      hold: el('path', { stroke: C.blue, 'stroke-width': 2.6, 'stroke-linejoin': 'round' }, svg)
+      nohold: el('path', { stroke: C.coral, 'stroke-width': 1.6, 'stroke-dasharray': '4 4', 'stroke-linejoin': 'round' }, svg),
+      hold: el('path', { stroke: C.blue, 'stroke-width': 2.2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg)
     };
     const alarmG = el('g', { opacity: 0 }, svg);
     const ax = xs(T.hold.alarm_ms);

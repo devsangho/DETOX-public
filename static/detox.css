@@ -1,4 +1,4 @@
-/* DETOX project page, Solar Dawn design system (x2Real design guide v1.0). */
+/* DETOX project page. Solar Dawn paper design rules (x2Real design.paper.md v2.1). */
 :root{
   --paper:#f4f5f2; --ink:#10141b; --body:#3b434e; --muted:#69717c; --faint:#8b939e;
   --blue:#3f5876; --blue-light:#778daa; --coral:#e68670; --coral-deep:#c9644d; --peach:#f7d8ca;
@@ -11,8 +11,8 @@
   --font-mono:"Geist Mono",ui-monospace,Menlo,monospace;
   --signal:linear-gradient(100deg,#3f5876 0%,#5c7699 30%,#d9765f 70%,#c9644d 100%);
   --night-signal:linear-gradient(100deg,#c3d1e4 0%,#97aecc 30%,#f09a82 70%,#f7d8ca 100%);
-  /* data semantics: coral = attack / harm, deep blue = DETOX / owner side, slate = baselines */
-  --attack:#e68670; --ours:#3f5876; --slate:#8b939e;
+  /* data semantics: 이름만 논문에 맞게, 값은 아래 셋 중 하나 */
+  --ours:#3f5876; --attack:#e68670; --slate:#8b939e;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth; scroll-padding-top:72px}
@@ -28,8 +28,9 @@ sup,sub{font-size:.62em; line-height:0}
 svg text{font-family:var(--font-latin)}
 .wrap{width:100%; max-width:1200px; margin-inline:auto; padding-inline:clamp(16px,3vw,40px)}
 .mono{font-family:var(--font-mono)}
-.dmark{font-weight:600; color:var(--ink); letter-spacing:.01em}
-.night .dmark{color:var(--night-ink)}
+.mark{font-weight:600; color:var(--ink)}
+.night .mark{color:var(--night-ink)}
+em,i{font-style:normal}
 .t-attack{color:var(--coral-deep); font-weight:600}
 .t-ours{color:var(--blue); font-weight:600}
 .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
@@ -94,6 +95,7 @@ svg text{font-family:var(--font-latin)}
 .btn:hover{color:var(--ink); background:#fff; border-color:var(--line-strong)}
 .btn .arr{display:inline-block; transition:transform .3s var(--ease-out-brand)}
 .btn:hover .arr{transform:translate(3px,-3px)}
+.btn:hover .arr.down{transform:translate(0,3px)}
 .btn.primary{position:relative; color:#fff; background:var(--ink); border-color:var(--ink); overflow:hidden}
 .btn.primary::after{content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--signal)}
 .btn.primary:hover{background:var(--blue); border-color:var(--blue); box-shadow:0 10px 28px rgba(63,88,118,.28)}
@@ -106,7 +108,7 @@ svg text{font-family:var(--font-latin)}
   backdrop-filter:blur(10px); display:flex; flex-wrap:wrap; gap:8px 18px; font-family:var(--font-mono); font-size:11.5px; font-weight:500; color:var(--body)}
 .art-card span{display:inline-flex; align-items:center; gap:8px}
 .art-card i{display:inline-block; width:18px; height:2px; border-radius:2px}
-.art-card .k-a i{background:var(--attack)}
+.art-card .k-a i{height:0; background:none; border-top:1.5px dashed var(--attack)}
 .art-card .k-o i{background:var(--ours)}
 .art-card .k-q i{height:0; border-top:1.5px dashed var(--muted)}
 
@@ -265,7 +267,10 @@ figcaption b{color:var(--ink); font-weight:600}
 .two-col{display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; align-items:stretch}
 .two-col.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media(max-width:960px){.two-col,.two-col.even{grid-template-columns:minmax(0,1fr)}}
-.chart-title{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:6px}
+.chart-title{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+.night .chart-title,.chart-card.dark .chart-title{border-top-color:var(--night-line)}
+.chart-card.dark .chart-title b{color:var(--night-ink)}
+.chart-card.dark .chart-title span{color:var(--night-muted)}
 .chart-title b{color:var(--ink); font-size:15px; font-weight:600; letter-spacing:-.01em}
 .chart-title span{font-family:var(--font-mono); font-size:11px; color:var(--muted)}
 
@@ -323,7 +328,7 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
 .site-footer{background:var(--night); color:var(--night-muted); border-top:1px solid var(--night-line); padding-block:64px 40px; font-size:14px}
 .site-footer h3{margin:0 0 12px; font-family:var(--font-mono); font-size:12px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#97aecc}
 .site-footer .wrap{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:32px; align-items:start}
-@media(max-width:760px){.site-footer .wrap{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.site-footer .wrap{grid-template-columns:minmax(0,1fr)}}
 .visitor-map{width:260px; max-width:100%; overflow:hidden}
 .visitor-map img,.visitor-map iframe{max-width:100%}
 .site-footer p{max-width:62ch; line-height:1.6; color:var(--night-body)}
@@ -373,10 +378,12 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
 /* ---------- Replay video wall ---------- */
 .vwall-head{margin-top:clamp(48px,5vw,72px); margin-bottom:20px}
 .vwall-head .lede{margin-top:8px}
-.vwall{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
+.vwall{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
 @media(max-width:860px){.vwall{grid-template-columns:minmax(0,1fr)}}
-.vtile{background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden}
-.vbox{position:relative; aspect-ratio:908/494; background:#111720}
+.vtile{background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden; cursor:zoom-in;
+  transition:transform .35s var(--ease-out-brand), box-shadow .35s var(--ease-out-brand)}
+.vtile:hover{transform:translateY(-2px); box-shadow:0 16px 32px -18px rgba(16,20,27,.45)}
+.vbox{position:relative; aspect-ratio:896/494; background:#0e141c}
 .vbox video{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover}
 .vtile figcaption{margin:0; padding:12px 16px 14px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:2px; font-size:13.5px; color:var(--body)}
 .vtile figcaption b{color:var(--ink); font-size:15px}
@@ -385,3 +392,43 @@ td .second{text-decoration:underline; text-underline-offset:3px; text-decoration
 /* ---------- Small screens: keep the header on one line ---------- */
 .site-nav .nav-cta{white-space:nowrap}
 @media(max-width:560px){.logo small{display:none}}
+
+/* ---------- Wordmark on very small screens (F-10) ---------- */
+@media(max-width:420px){.brand-hero{font-size:clamp(52px,18.5vw,70px)}}
+
+/* ---------- Video tags, outcome marks, lightbox (V-02, V-05) ---------- */
+.vbox .half-tag{position:absolute; top:8px; z-index:2; display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-mono); font-size:10px; font-weight:500; color:#fff; padding:3px 9px; border-radius:999px;
+  background:rgba(17,23,32,.72); backdrop-filter:blur(4px)}
+.vbox .half-tag::before{content:""; width:6px; height:6px; border-radius:50%; flex:none}
+.vbox .half-tag.l{left:8px} .vbox .half-tag.l::before{background:var(--attack)}
+.vbox .half-tag.r{left:calc(50% + 8px)} .vbox .half-tag.r::before{background:#97aecc}
+.vbox .okmark{position:absolute; bottom:52px; z-index:2; display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--font-latin); font-size:10px; font-weight:600; padding:3px 9px; border-radius:999px}
+.vbox .okmark.l{right:calc(50% + 8px)} .vbox .okmark.r{right:8px}
+.vbox .okmark.success{background:rgba(255,255,255,.92); color:var(--ink)}
+.vbox .okmark.success::before{content:"\2713"; font-size:10px}
+.vbox .okmark.fail{background:rgba(17,23,32,.6); color:#c9d1dc; box-shadow:inset 0 0 0 1px rgba(201,209,220,.35)}
+.vbox .okmark.fail::before{content:"\00d7"; font-size:12px; line-height:1}
+.lightbox{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+  background:rgba(17,23,32,.94); backdrop-filter:blur(10px); padding:30px 20px}
+.lightbox.open{display:flex}
+.lightbox video{max-width:min(1240px,96vw); max-height:78vh; width:auto; height:auto; border-radius:12px; border:1px solid var(--night-line); background:#000}
+.lb-bar{display:flex; flex-wrap:wrap; justify-content:center; gap:8px 18px; font-family:var(--font-mono); font-size:12.5px; color:var(--night-muted)}
+.lb-bar .lb-title{color:var(--night-ink)}
+.lb-close{position:absolute; top:16px; right:20px; width:44px; height:44px; background:transparent; border:1px solid var(--night-line); border-radius:999px;
+  color:var(--night-body); font-size:24px; line-height:1; cursor:pointer; transition:color .25s var(--ease-out-brand), border-color .25s var(--ease-out-brand)}
+.lb-close:hover{color:#fff; border-color:var(--night-muted)}
+@media (prefers-reduced-motion:no-preference){.lightbox.open video{animation:enter .45s var(--ease-out-brand)}}
+@media(max-width:640px){.vbox .half-tag{font-size:8.5px; padding:2px 7px} .vbox .okmark{font-size:8.5px; padding:2px 7px; bottom:40px}}
+
+/* ---------- Ring pulse nodes (HA-03) ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .ring{transform-box:fill-box; transform-origin:center; animation:ring 4.4s var(--ease-out-brand) infinite}
+  .ring.d2{animation-delay:1.4s} .ring.d3{animation-delay:2.8s}
+}
+@keyframes ring{0%{opacity:.7; transform:scale(1)}100%{opacity:0; transform:scale(3.2)}}
+@media (prefers-reduced-motion:reduce){.ring{display:none}}
+
+/* ---------- Segmented toggles wrap instead of overflowing (L-21) ---------- */
+.seg{flex-wrap:wrap; max-width:100%}

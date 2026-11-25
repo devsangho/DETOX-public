@@ -15,10 +15,10 @@ DETOX is a runtime defense for vision-language-action (VLA) robot policies. It r
 
 ## Questions and answers
 ### What is DETOX?
-DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it.
+DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it.
 
 ### Which attacks and harms does DETOX defend against?
-DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite.
+DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite.
 
 ### Why not read the policy's hidden states, images, or instructions?
 Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset.
