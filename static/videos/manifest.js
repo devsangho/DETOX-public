@@ -11,7 +11,7 @@ window.DETOX_VIDEOS = [
  {
   "slug": "release_spatial",
   "harm": "Abrupt release",
-  "scene": "LIBERO-Spatial \u00b7 instruction hijack",
+  "scene": "LIBERO-Spatial \u00b7 instruction attack",
   "lead_steps": 11,
   "with_hold": "object kept in the gripper",
   "camera": "top view"
@@ -19,7 +19,7 @@ window.DETOX_VIDEOS = [
  {
   "slug": "contact",
   "harm": "Forceful contact",
-  "scene": "LIBERO-Spatial \u00b7 instruction hijack",
+  "scene": "LIBERO-Spatial \u00b7 instruction attack",
   "lead_steps": 25,
   "with_hold": "push stopped",
   "camera": "top view"
@@ -27,7 +27,7 @@ window.DETOX_VIDEOS = [
  {
   "slug": "overspeed",
   "harm": "Overspeed",
-  "scene": "LIBERO-Spatial \u00b7 instruction hijack",
+  "scene": "LIBERO-Spatial \u00b7 instruction attack",
   "lead_steps": 25,
   "with_hold": "arm stopped",
   "camera": "top view"

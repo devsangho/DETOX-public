@@ -734,7 +734,7 @@
     const svg = document.getElementById('ablation-svg'); if (!svg) return;
     const sig = gradient(svg, 'ab-sig', [[0, '#c3d1e4'], [.5, '#97aecc'], [1, '#f09a82']]);
     const groups = [
-      { lab: 'Median alarm lead before a release', unit: ' steps', a: 6, b: 2, max: 8 },
+      { lab: 'Object releases: median alarm delay after the opening command (lower is earlier)', unit: ' steps', a: 2, b: 5, max: 8 },
       { lab: 'Releases prevented (of 107)', unit: '', a: 80, b: 53, max: 107 },
       { lab: 'LIBERO-Object releases prevented (of 63)', unit: '', a: 37, b: 10, max: 63 }];
     const X0 = 150, X1 = 470;
@@ -847,25 +847,34 @@
     });
   })();
 
-  /* ---------- 06: prevention by lead ---------- */
+  /* ---------- 06: release prevention by suite (alarm vs opening command) ---------- */
   (function () {
     const svg = document.getElementById('lead-svg'); if (!svg) return;
-    const sig = gradient(svg, 'lead-sig', [[0, '#3f5876'], [1, '#c9644d']], '0');
-    const cols = [['≥ 3 steps (0.15 s)', 93.6, 'most events'], ['1–2 steps', 83.3, '10 of 12'], ['at the onset step', 100, '1 of 1']];
-    const Y0 = 200, Y1 = 30, W = 120;
-    el('line', { x1: 30, x2: 620, y1: Y0, y2: Y0, stroke: C.line }, svg);
-    const B = cols.map((c, i) => {
-      const x = 80 + i * 190;
-      el('text', { x: x + W / 2, y: Y0 + 22, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 600, fill: C.ink, text: c[0] }, svg);
-      el('text', { x: x + W / 2, y: Y0 + 40, 'text-anchor': 'middle', 'font-size': 11, 'font-family': 'Geist Mono, monospace', fill: C.muted, text: c[2] }, svg);
-      el('rect', { x, y: Y1, width: W, height: Y0 - Y1, rx: 4, fill: 'rgba(16,20,27,.04)' }, svg);
-      const r = el('rect', { x, y: Y0, width: W, height: 0, rx: 4, fill: i === 0 ? C.blue : C.blueL, opacity: i === 0 ? 1 : .75 }, svg);
-      const tx = el('text', { x: x + W / 2, y: Y0 - 8, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 600, fill: C.ink }, svg);
-      return { r, tx, v: c[1] };
+    const mono = 'Geist Mono, monospace';
+    const rows = [
+      { y: 22, name: 'LIBERO-Spatial releases', sub: 'alarm before the opening command in 40 of 43 flagged', n: 44, ok: 43 },
+      { y: 150, name: 'LIBERO-Object releases', sub: 'alarm after the opening command in 58 of 63 (median 2 steps)', n: 63, ok: 37 }];
+    const X0 = 0, P = 20, S = 16, PER = 20, XT = X0 + PER * P + 16;
+    const R = rows.map(r => {
+      el('text', { x: X0, y: r.y, 'font-size': 13.5, 'font-weight': 600, fill: C.ink, text: r.name }, svg);
+      el('text', { x: X0, y: r.y + 18, 'font-size': 11, 'font-family': mono, fill: C.muted, text: r.sub }, svg);
+      const arr = [];
+      for (let j = 0; j < r.n; j++) arr.push(el('rect', { x: X0 + (j % PER) * P, y: r.y + 30 + Math.floor(j / PER) * P, width: S, height: S, rx: 2, fill: 'rgba(16,20,27,.08)' }, svg));
+      const tx = el('text', { x: XT, y: r.y + 44, 'font-size': 15, 'font-weight': 600, 'font-family': mono, fill: C.ink, text: '' }, svg);
+      return { r, arr, tx };
     });
+    const lg = el('g', { transform: 'translate(' + X0 + ' 292)' }, svg);
+    el('rect', { x: 0, y: -9, width: 10, height: 10, rx: 2, fill: C.blue }, lg);
+    el('text', { x: 16, y: 0, 'font-size': 11, 'font-family': mono, fill: C.muted, text: 'prevented by the hold' }, lg);
+    el('rect', { x: 190, y: -9, width: 10, height: 10, rx: 2, fill: C.coral }, lg);
+    el('text', { x: 206, y: 0, 'font-size': 11, 'font-family': mono, fill: C.muted, text: 'still occurred' }, lg);
     onView(svg, (now, go) => {
-      const draw = k => B.forEach(b => { const h = (Y0 - Y1) * b.v / 100 * k; set(b.r, { y: Y0 - h, height: h }); set(b.tx, { y: Y0 - h - 8, text: (b.v * k).toFixed(1) + '%' }); });
-      if (now) draw(1); else if (go) tween(1200, draw); else draw(0);
+      const draw = k => R.forEach(o => {
+        const m = Math.round(o.r.n * k);
+        o.arr.forEach((a, j) => set(a, { fill: j >= m ? 'rgba(16,20,27,.08)' : (j < o.r.ok ? C.blue : C.coral) }));
+        set(o.tx, { text: Math.min(m, o.r.ok) + ' / ' + o.r.n + ' prevented' });
+      });
+      if (now) draw(1); else if (go) tween(1400, draw); else draw(0);
     });
   })();
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DETOX: Runtime Defense for Vision–Language–Action Models under Attack</title>
-<meta name="description" content="DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot&#x27;s own trusted telemetry and replaces the next command with a hold before a backdoored or hijacked policy drops an object, pushes a bystander, or moves too fast.">
+<meta name="description" content="DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot&#x27;s own trusted telemetry and holds the robot on an alarm, a last line of defense against an attacked policy that drops an object, pushes with excessive force, or moves at excessive speed.">
 <link rel="canonical" href="https://devsangho.github.io/DETOX-public/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1, max-snippet:-1">
 <meta name="author" content="Sangho Yun, Minsoo Kim, Hwanjo Yu">
@@ -19,7 +19,7 @@
 <meta property="og:title" content="DETOX: Runtime Defense for Vision–Language–Action Models under Attack">
 <meta property="og:description" content="Stop the physical harm of a compromised VLA policy from trusted telemetry alone. 388 of 391 harm events flagged before onset at 0.56% clean false alarms, 92.8% prevented; 9 of 10 triggered releases kept on a real UR5e.">
 <meta property="og:url" content="https://devsangho.github.io/DETOX-public/">
-<meta property="og:updated_time" content="2026-11-23T15:00:00+09:00">
+<meta property="og:updated_time" content="2026-11-28T15:00:00+09:00">
 <meta property="og:image" content="https://devsangho.github.io/DETOX-public/static/og.jpg">
 <meta property="og:image:secure_url" content="https://devsangho.github.io/DETOX-public/static/og.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -38,7 +38,7 @@
 <meta property="og:video:height" content="494">
 <meta property="og:video:alt" content="LIBERO-Object abrupt release replayed without DETOX (left) and with the DETOX hold (right)">
 <meta property="article:published_time" content="2026-11-23T13:00:00+09:00">
-<meta property="article:modified_time" content="2026-11-23T15:00:00+09:00">
+<meta property="article:modified_time" content="2026-11-28T15:00:00+09:00">
 <meta property="article:author" content="Sangho Yun">
 <meta property="article:author" content="Minsoo Kim">
 <meta property="article:author" content="Hwanjo Yu">
@@ -71,11 +71,11 @@
 <meta name="citation_publication_date" content="2026/11/23">
 <meta name="citation_keywords" content="VLA safety; VLA defense; vision-language-action; VLA backdoor; backdoor attack; runtime defense; runtime monitoring; trusted telemetry; harm prevention; anomaly detection; conformal calibration; robot safety; robot manipulation; OpenVLA-OFT">
 
-<link rel="icon" href="favicon.ico?v=20261125a" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="static/favicon.svg?v=20261125a">
-<link rel="icon" type="image/png" sizes="32x32" href="static/icon_32.png?v=20261125a">
-<link rel="icon" type="image/png" sizes="192x192" href="static/icon_192.png?v=20261125a">
-<link rel="apple-touch-icon" href="static/icon_180.png?v=20261125a">
+<link rel="icon" href="favicon.ico?v=20261128a" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="static/favicon.svg?v=20261128a">
+<link rel="icon" type="image/png" sizes="32x32" href="static/icon_32.png?v=20261128a">
+<link rel="icon" type="image/png" sizes="192x192" href="static/icon_192.png?v=20261128a">
+<link rel="apple-touch-icon" href="static/icon_180.png?v=20261128a">
 <link rel="manifest" href="site.webmanifest">
 <script type="application/ld+json">
 {
@@ -94,7 +94,7 @@
    "@id": "https://devsangho.github.io/DETOX-public/#webpage",
    "url": "https://devsangho.github.io/DETOX-public/",
    "name": "DETOX: Runtime Defense for Vision-Language-Action Models under Attack",
-   "description": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot's own trusted telemetry and replaces the next command with a hold before a backdoored or hijacked policy drops an object, pushes a bystander, or moves too fast.",
+   "description": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It reads only the robot's own trusted telemetry and holds the robot on an alarm, a last line of defense against an attacked policy that drops an object, pushes with excessive force, or moves at excessive speed.",
    "isPartOf": {
     "@id": "https://devsangho.github.io/DETOX-public/#website"
    },
@@ -102,7 +102,7 @@
     "@id": "https://devsangho.github.io/DETOX-public/#paper"
    },
    "primaryImageOfPage": "https://devsangho.github.io/DETOX-public/static/og.jpg",
-   "dateModified": "2026-11-23",
+   "dateModified": "2026-11-28",
    "inLanguage": "en"
   },
   {
@@ -113,7 +113,7 @@
    "alternativeHeadline": "DETOX",
    "url": "https://devsangho.github.io/DETOX-public/",
    "mainEntityOfPage": "https://devsangho.github.io/DETOX-public/",
-   "abstract": "Vision-language-action (VLA) policies are usually deployed from public checkpoints, and backdoored weights or a manipulated instruction can make the robot drop a carried object, push a bystander object, or move too fast. Detecting the attack is not enough. Once the grip is lost the object is already falling, so the harm must be stopped before onset. Existing defenses read the policy's hidden states or inputs, which the attacker shapes, and do not measure harms prevented. We propose DETOX, a runtime defense that reads only owner-side physical telemetry and, on an alarm, replaces the next command with a hold. We hypothesize that a physical change signals harm only relative to the robot's context, since finger effort drops in a malicious release and in a normal placement alike. DETOX therefore scores each step against clean behavior from the same context, trains without attack data, and calibrates its threshold on clean runs of the deployed model. On 9,393 simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset at 0.56% false alarms, and its replayed hold prevented 363, versus at most 328 for five policy-side baselines. Under an unseen image patch, the frozen DETOX flagged 55 of 73 releases, versus at most 36 for the baselines. On a UR5e arm, its online hold kept the carried object in 9 of 10 triggered releases of a backdoored OpenVLA-OFT policy.",
+   "abstract": "The weights, instruction, and camera images of a vision-language-action (VLA) policy originate outside the robot. An attacker who alters any of them can make the robot drop an object, push with excessive force, or move at excessive speed. Existing defenses read these components or signals computed from them. Only the robot's own telemetry can be trusted, since an attacker can alter it only by moving the robot, which any harm requires. We propose DETOX, a last line of defense that reads only this telemetry and holds the robot on an alarm. A release caused by an attack stays within the clean range of every channel, because the finger effort also drops at normal placements. DETOX compares each step with clean steps of the same physical context, which more than halved the alarm's delay on backdoor-triggered releases. Fitted without attack data, DETOX flagged 99% of defended harms before onset under two simulated attacks, at 0.56% false alarms in valid harm-free clean episodes. Its hold prevented 93% of these harms, more than any policy-side detector we ran. On a UR5e arm with a capped opening speed, the online hold kept the grasp in 9 of 10 backdoor-triggered releases.",
    "keywords": [
     "DETOX",
     "VLA safety",
@@ -186,7 +186,8 @@
      "name": "hold",
      "description": "The command DETOX substitutes after an alarm: zero arm increments, re-close the gripper if an object was held in the last four steps, otherwise keep the last gripper command."
     }
-   ]
+   ],
+   "dateModified": "2026-11-28"
   },
   {
    "@type": "FAQPage",
@@ -197,7 +198,7 @@
      "name": "What is DETOX?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it."
+      "text": "DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot's own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold. It is a last line of defense that can run beneath any policy-side detector."
      }
     },
     {
@@ -205,7 +206,7 @@
      "name": "Which attacks and harms does DETOX defend against?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite."
+      "text": "DETOX treats the policy weights, the instruction, and the camera images as untrusted, since a backdoored public checkpoint, an edited instruction, and an image patch each alter one of them. It defends three physical harms defined on the state of the robot and its surroundings: an abrupt release that drops a lifted object back onto its surface, a forceful contact whose wrist-force peak exceeds the clean maximum and lands the held object or displaces a bystander object more than 2 cm, and an overspeed above the clean maximum speed of the task suite. Under the two simulated attacks, these classes hold 391 of the 425 harm events."
      }
     },
     {
@@ -213,7 +214,7 @@
      "name": "Why not read the policy's hidden states, images, or instructions?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset."
+      "text": "The attack can shape those signals, so what a policy-side detector catches depends on the attack route. On the same episodes, FAIL-Detect prevented all 63 backdoor-triggered releases and none of the 328 events under the instruction attack, while Bera prevented 327 of those and 1 backdoor-triggered release. DETOX trusts only the telemetry the owner controls, which the attacker can change only by moving the robot."
      }
     },
     {
@@ -221,7 +222,7 @@
      "name": "What is the context-normalized score?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context's clean center in units of the context's clean spread. A finger-effort drop is normal when an object is set down but alarming mid-transport. In an ablation, the contexts raised the median alarm lead before a release from 2 to 6 control steps and the prevented releases from 53 to 80 of 107."
+      "text": "Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context's clean center in units of the context's clean spread. Finger effort also drops at every normal placement, so a release stays within the clean range of every channel. In a post hoc ablation with one shared context, the alarm on LIBERO-Object releases came 5 instead of 2 steps after the opening command, and the prevented releases fell from 80 to 53 of 107."
      }
     },
     {
@@ -229,7 +230,7 @@
      "name": "Does DETOX need attack data?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "No. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability."
+      "text": "No attacked run entered fitting or calibration. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability. The score's design and constants were set on development data that included attacked runs, and everything was fixed before the test batch was opened."
      }
     },
     {
@@ -237,7 +238,7 @@
      "name": "What results does DETOX achieve?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset (99.2%) at 0.56% clean false alarms (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged and prevented 55 of 73 releases, versus at most 36. On a real UR5e with a backdoored OpenVLA-OFT policy, its online hold kept the carried object in 9 of 10 triggered releases, while without the hold the object fell in 5 of 5."
+      "text": "On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 defended harms before onset (99.2%) at 0.56% false alarms in valid harm-free clean episodes (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged 55 of 73 releases, versus at most 36, and the hold prevented all 55. On a real UR5e with a backdoored OpenVLA-OFT policy and a capped opening speed, its online hold kept the grasp in 9 of 10 triggered releases, while without the hold the toy fell in 5 of 5."
      }
     },
     {
@@ -245,7 +246,7 @@
      "name": "What are the limits of DETOX?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. In LIBERO-Object, 24 released objects slipped from the re-closed gripper despite an early alarm, so the limit there lies in the hold rather than in sensing."
+      "text": "The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. DETOX reads the fingers and not the command, so in LIBERO-Object the alarm followed the opening command in 58 of 63 releases and the hold prevented 37, while the same hold prevented all 63 on FAIL-Detect's earlier alarm. The false-alarm rate holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of valid harm-free clean runs of an uncalibrated public OFT policy alarmed, and a threshold recalibrated on other clean OFT runs alarmed in 0.85% and 1.9% of two other batches, both above alpha."
      }
     },
     {
@@ -283,7 +284,7 @@
    "@type": "VideoObject",
    "@id": "https://devsangho.github.io/DETOX-public/#video-release_spatial",
    "name": "Abrupt release, LIBERO-Spatial: replay without and with the DETOX hold",
-   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction hijack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 11 control steps before onset.",
+   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction attack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 11 control steps before onset.",
    "thumbnailUrl": "https://devsangho.github.io/DETOX-public/static/videos/release_spatial.jpg",
    "contentUrl": "https://devsangho.github.io/DETOX-public/static/videos/release_spatial.mp4",
    "encodingFormat": "video/mp4",
@@ -297,7 +298,7 @@
    "@type": "VideoObject",
    "@id": "https://devsangho.github.io/DETOX-public/#video-contact",
    "name": "Forceful contact, LIBERO-Spatial: replay without and with the DETOX hold",
-   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction hijack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 25 control steps before onset.",
+   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction attack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 25 control steps before onset.",
    "thumbnailUrl": "https://devsangho.github.io/DETOX-public/static/videos/contact.jpg",
    "contentUrl": "https://devsangho.github.io/DETOX-public/static/videos/contact.mp4",
    "encodingFormat": "video/mp4",
@@ -311,7 +312,7 @@
    "@type": "VideoObject",
    "@id": "https://devsangho.github.io/DETOX-public/#video-overspeed",
    "name": "Overspeed, LIBERO-Spatial: replay without and with the DETOX hold",
-   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction hijack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 25 control steps before onset.",
+   "description": "A recorded attacked LIBERO episode (LIBERO-Spatial · instruction attack) replayed side by side: the recorded actions on the left and the same actions with the DETOX hold from its alarm on the right. The alarm came 25 control steps before onset.",
    "thumbnailUrl": "https://devsangho.github.io/DETOX-public/static/videos/overspeed.jpg",
    "contentUrl": "https://devsangho.github.io/DETOX-public/static/videos/overspeed.mp4",
    "encodingFormat": "video/mp4",
@@ -356,9 +357,10 @@
     <div class="hero-copy">
       <h1 class="brand-hero" aria-label="DETOX: Runtime Defense for Vision–Language–Action Models under Attack"><span aria-hidden="true">DETOX</span></h1>
       <p class="full-title">Runtime Defense for Vision&ndash;Language&ndash;Action Models under Attack</p>
-      <p class="hero-claim">A backdoored or hijacked VLA policy can drop what it carries, push a bystander, or move too fast.
-        <b>Detecting the attack is not enough.</b> <span class="mark">DETOX</span> reads only the robot&rsquo;s own
-        trusted telemetry and replaces the next command with a hold before the harm begins.</p>
+      <p class="hero-claim">A backdoored checkpoint, an edited instruction, or an image patch can make a VLA policy drop an object,
+        push with excessive force, or move at excessive speed. <b>Whatever its route, the attack has to move the robot.</b>
+        <span class="mark">DETOX</span> reads only the robot&rsquo;s own trusted telemetry and holds the robot on an alarm,
+        a last line of defense beneath any policy-side detector.</p>
       <div>
         <p class="authors"><span><a href="https://www.devsangho.com" target="_blank" rel="noopener">Sangho Yun</a><sup>1</sup></span>, <span>Minsoo Kim<sup>2</sup></span>, and <span>Hwanjo Yu<sup>1,2</sup></span></p>
         <p class="affil"><img src="static/postech_emblem.png" alt="POSTECH emblem">POSTECH, <a href="https://sites.google.com/view/postechdi" target="_blank" rel="noopener">DI Lab</a></p>
@@ -390,9 +392,9 @@
   <canvas id="stat-canvas" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="stat-row">
-      <div class="stat"><span class="idx">01 · LIBERO</span><span class="big"><span data-count="388">388</span><small>&thinsp;/ 391</small></span><span class="lbl">Harm events flagged before onset<br><em>9,393 held-out LIBERO episodes</em></span></div>
-      <div class="stat"><span class="idx">02 · LIBERO</span><span class="big"><span data-count="92.8" data-dec="1">92.8</span><small>%</small></span><span class="lbl">Harm events stopped by the hold<br><em>best policy-side baseline 83.9%</em></span></div>
-      <div class="stat"><span class="idx">03 · LIBERO</span><span class="big"><span data-count="0.56" data-dec="2">0.56</span><small>%</small></span><span class="lbl">Clean episodes with an alarm<br><em>16 of 2,843, calibrated model</em></span></div>
+      <div class="stat"><span class="idx">01 · LIBERO</span><span class="big"><span data-count="388">388</span><small>&thinsp;/ 391</small></span><span class="lbl">Defended harms flagged before onset<br><em>9,393 held-out LIBERO episodes</em></span></div>
+      <div class="stat"><span class="idx">02 · LIBERO</span><span class="big"><span data-count="92.8" data-dec="1">92.8</span><small>%</small></span><span class="lbl">Defended harms prevented by the hold<br><em>best policy-side baseline 83.9%</em></span></div>
+      <div class="stat"><span class="idx">03 · LIBERO</span><span class="big"><span data-count="0.56" data-dec="2">0.56</span><small>%</small></span><span class="lbl">Valid harm-free clean episodes with an alarm<br><em>16 of 2,843, calibrated models</em></span></div>
       <div class="stat"><span class="idx">04 · UR5E</span><span class="big"><span data-count="9">9</span><small>&thinsp;/ 10</small></span><span class="lbl">Triggered releases kept in hand<br><em>vs 0&thinsp;/ 5 without the hold</em></span></div>
     </div>
   </div>
@@ -404,11 +406,11 @@
     <div class="sec-head reveal">
       <div>
         <div class="label"><span class="no">01</span>The problem</div>
-        <h2>Detecting the Attack Is Not Enough</h2>
+        <h2>Preventing a Harm Is Harder than Flagging an Attack</h2>
       </div>
-      <p class="lede">Once the grip is lost, the object is already falling. A defense that only labels the episode as
-        attacked, or that reacts after the harm, leaves the damage done. The harm must be stopped <b>before onset</b>,
-        and that is what we measure.</p>
+      <p class="lede">The owner cannot certify a public checkpoint or the inputs it receives before deployment, so the
+        resulting harms have to be stopped at run time. An alarm prevents a harm only if it comes <b>before the harm begins</b>
+        and the hold that follows averts it, and that is what we measure.</p>
     </div>
     <div class="plate gap-stage reveal">
       <div class="controls">
@@ -421,16 +423,17 @@
     <div class="tldr" style="margin-top:clamp(40px,5vw,64px)">
       <div class="reveal">
         <h3 class="sub">What DETOX does</h3>
-        <p class="tldr-lede" style="margin-top:8px">Existing defenses read the policy&rsquo;s hidden states, images, instructions, or proposed actions,
-          which are <b>exactly the channels the attacker shapes</b>. <span class="mark">DETOX</span> reads only the
-          gripper, wrist force&ndash;torque, and joint sensors the owner controls, scores each step against clean behavior
-          <b>from the same physical context</b>, and latches a hold on the first alarm.</p>
+        <p class="tldr-lede" style="margin-top:8px">Existing runtime defenses read the policy&rsquo;s hidden states, attention, input tokens, images,
+          or proposed actions, <b>signals the attack can shape</b>, so what they catch depends on the attack route.
+          <span class="mark">DETOX</span> reads only the gripper, wrist force&ndash;torque, and joint sensors, which report to the
+          owner&rsquo;s controller without passing through the policy, scores each step against clean steps
+          <b>of the same physical context</b>, and latches a hold on the first alarm.</p>
       </div>
       <ul class="tldr-list reveal">
         <li><span class="n">01</span><div><b>Trusted telemetry only.</b><span>Never images, instructions, hidden states, or the proposed command.</span></div></li>
-        <li><span class="n">02</span><div><b>Context-normalized score.</b><span>A finger-effort drop is normal when setting an object down and alarming mid-transport. Each step is judged against its own context.</span></div></li>
+        <li><span class="n">02</span><div><b>Context-normalized score.</b><span>Finger effort also drops at every normal placement, so each step is compared with clean steps of its own context.</span></div></li>
         <li><span class="n">03</span><div><b>No attack data in training.</b><span>Clean runs plus attack-free simulated faults and physical excursions. One conformal threshold per environment, calibrated on clean runs of the deployed model.</span></div></li>
-        <li><span class="n">04</span><div><b>Measured as harms prevented.</b><span>Detection before onset, prevention by the hold, and clean false alarms are reported separately.</span></div></li>
+        <li><span class="n">04</span><div><b>Measured as harms prevented.</b><span>Detection before onset, prevention by the hold, and clean false alarms are reported separately for each harm class.</span></div></li>
       </ul>
     </div>
   </div>
@@ -446,10 +449,11 @@
         <h2>Trust Only What the Owner Controls</h2>
       </div>
       <div>
-        <p class="lede">The attacker controls the policy&rsquo;s <b>weights, camera image, and instruction</b>, and so the proposed
-          command a<sub>t</sub>. The owner controls the <b>telemetry</b> y<sub>t</sub> and
-          <span class="mark">DETOX</span>, which sits between the policy and the robot. The attacker can change the
-          telemetry only by actually moving the robot.</p>
+        <p class="lede">The attacker may alter the policy&rsquo;s <b>weights, camera images, and instruction</b>, and so everything
+          derived from them, including the proposed command a<sub>t</sub>. The owner controls the sensors, the low-level
+          controller, and <span class="mark">DETOX</span>, which sits between the policy and the robot, so the attacker can set the
+          <b>telemetry</b> y<sub>t</sub> only by moving the robot. Sensor forgery, a compromised controller, command paths that
+          bypass <span class="mark">DETOX</span>, and attackers that adapt to the monitor are out of scope.</p>
         <p class="lede">Switch to an attacked run and watch the commands turn hostile, the telemetry react, and the gate latch a hold.</p>
       </div>
     </div>
@@ -483,9 +487,9 @@
         <div class="label"><span class="no">03</span>Defended harms</div>
         <h2>Three Harms, Defined by Their Physical Consequence</h2>
       </div>
-      <p class="lede">One definition covers backdoors, instruction attacks, and image patches, because harms are labelled by what
-        happens physically, not by the attack route. Toggle the defense to see the hold in each case.
-        Counts are from the held-out test batch (Table I).</p>
+      <p class="lede">A harm is defined on the state of the robot and its surroundings, not on the attack, so one definition covers
+        backdoors, instruction attacks, and image patches. Each event is labelled from the simulator state with an onset step,
+        without reference to the alarm. Toggle the defense to see the hold in each case. Counts are from the held-out test batch (Table I).</p>
     </div>
     <div class="controls reveal">
       <span class="schematic-tag">schematic</span>
@@ -498,7 +502,7 @@
       <article class="harm reveal">
         <span class="hn">Class 1</span>
         <h3>Abrupt release</h3>
-        <p class="def">An opening command drops the lifted object back onto the surface it was lifted from.</p>
+        <p class="def">Within 10 steps (0.5&nbsp;s) of an opening command, an object grasped and lifted at least 8&nbsp;cm lands back on the surface it was lifted from.</p>
         <svg class="harm-svg" data-kind="release" viewBox="0 0 320 200" aria-hidden="true"></svg>
         <div class="state"><span class="dot"></span><span class="txt">carrying</span></div>
         <dl><div><dt>Events</dt><dd>107</dd></div><div><dt>Detected</dt><dd>99.1<small>%</small></dd></div><div><dt>Prevented</dt><dd>74.8<small>%</small></dd></div></dl>
@@ -506,7 +510,7 @@
       <article class="harm reveal">
         <span class="hn">Class 2</span>
         <h3>Forceful contact</h3>
-        <p class="def">A wrist-force peak above the clean maximum that pushes a bystander object more than 2&nbsp;cm or hits the table.</p>
+        <p class="def">A wrist-force peak above the clean maximum, after which the held object lands or a bystander object moves more than 2&nbsp;cm within four steps.</p>
         <svg class="harm-svg" data-kind="contact" viewBox="0 0 320 200" aria-hidden="true"></svg>
         <div class="state"><span class="dot"></span><span class="txt">approaching</span></div>
         <dl><div><dt>Events</dt><dd>88</dd></div><div><dt>Detected</dt><dd>97.7<small>%</small></dd></div><div><dt>Prevented</dt><dd>98.9<small>%</small></dd></div></dl>
@@ -520,8 +524,9 @@
         <dl><div><dt>Events</dt><dd>196</dd></div><div><dt>Detected</dt><dd>100<small>%</small></dd></div><div><dt>Prevented</dt><dd>100<small>%</small></dd></div></dl>
       </article>
     </div>
-    <p class="note reveal">Release detection and prevention pool LIBERO-Object (63 events) and LIBERO-Spatial (44). Gradual slips without an opening
-      command and bystander removals leave too weak a trace in these channels and are outside the defended classes.</p>
+    <p class="note reveal">Release detection and prevention pool LIBERO-Object (63 events) and LIBERO-Spatial (44). Under the backdoor and the
+      instruction attack, these three classes hold 391 of the 425 harm events (92%). The other 34 are gradual slips and bystander
+      displacements without a force peak, which leave little trace in these channels and lie outside the defense.</p>
     <div class="vwall-head reveal">
       <div class="controls"><span class="schematic-tag measured-tag">recorded · LIBERO</span></div>
       <h3 class="sub">Recorded attacks, replayed with and without the hold</h3>
@@ -540,31 +545,31 @@
       </figure>
       <figure class="vtile reveal" data-slug="release_spatial" tabindex="0" role="button" aria-label="Open abrupt release replay">
         <div class="vbox">
-          <video data-src="static/videos/release_spatial.mp4" poster="static/videos/release_spatial.jpg" muted loop playsinline preload="none" aria-label="Abrupt release, LIBERO-Spatial · instruction hijack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
+          <video data-src="static/videos/release_spatial.mp4" poster="static/videos/release_spatial.jpg" muted loop playsinline preload="none" aria-label="Abrupt release, LIBERO-Spatial · instruction attack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
           <span class="half-tag l">without DETOX</span><span class="half-tag r">+ DETOX hold</span>
           <span class="okmark l fail">Harm</span><span class="okmark r success">Prevented</span>
         </div>
-        <figcaption><b>Abrupt release</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 11 steps (550&nbsp;ms) before onset · with hold: object kept in the gripper</span></figcaption>
+        <figcaption><b>Abrupt release</b><span>LIBERO-Spatial · instruction attack</span><span class="mono">alarm 11 steps (550&nbsp;ms) before onset · with hold: object kept in the gripper</span></figcaption>
       </figure>
       <figure class="vtile reveal" data-slug="contact" tabindex="0" role="button" aria-label="Open forceful contact replay">
         <div class="vbox">
-          <video data-src="static/videos/contact.mp4" poster="static/videos/contact.jpg" muted loop playsinline preload="none" aria-label="Forceful contact, LIBERO-Spatial · instruction hijack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
+          <video data-src="static/videos/contact.mp4" poster="static/videos/contact.jpg" muted loop playsinline preload="none" aria-label="Forceful contact, LIBERO-Spatial · instruction attack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
           <span class="half-tag l">without DETOX</span><span class="half-tag r">+ DETOX hold</span>
           <span class="okmark l fail">Harm</span><span class="okmark r success">Prevented</span>
         </div>
-        <figcaption><b>Forceful contact</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 25 steps (1250&nbsp;ms) before onset · with hold: push stopped</span></figcaption>
+        <figcaption><b>Forceful contact</b><span>LIBERO-Spatial · instruction attack</span><span class="mono">alarm 25 steps (1250&nbsp;ms) before onset · with hold: push stopped</span></figcaption>
       </figure>
       <figure class="vtile reveal" data-slug="overspeed" tabindex="0" role="button" aria-label="Open overspeed replay">
         <div class="vbox">
-          <video data-src="static/videos/overspeed.mp4" poster="static/videos/overspeed.jpg" muted loop playsinline preload="none" aria-label="Overspeed, LIBERO-Spatial · instruction hijack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
+          <video data-src="static/videos/overspeed.mp4" poster="static/videos/overspeed.jpg" muted loop playsinline preload="none" aria-label="Overspeed, LIBERO-Spatial · instruction attack: the recorded attacked run on the left and the same run with the DETOX hold on the right"></video>
           <span class="half-tag l">without DETOX</span><span class="half-tag r">+ DETOX hold</span>
           <span class="okmark l fail">Harm</span><span class="okmark r success">Prevented</span>
         </div>
-        <figcaption><b>Overspeed</b><span>LIBERO-Spatial · instruction hijack</span><span class="mono">alarm 25 steps (1250&nbsp;ms) before onset · with hold: arm stopped</span></figcaption>
+        <figcaption><b>Overspeed</b><span>LIBERO-Spatial · instruction attack</span><span class="mono">alarm 25 steps (1250&nbsp;ms) before onset · with hold: arm stopped</span></figcaption>
       </figure>
     </div>
     <p class="note reveal">Examples are events the replayed hold prevented, one per harm class, chosen by alarm lead. Not every event is prevented: overall the hold
-      prevented 363 of 391 events, and 24 LIBERO-Object releases slipped from the re-closed gripper. Camera: agentview (Object) and top view (Spatial).</p>
+      prevented 363 of 391 events but only 37 of the 63 LIBERO-Object releases (see Results). Camera: agentview (Object) and top view (Spatial).</p>
 
   </div>
 </section>
@@ -579,8 +584,10 @@
         <h2>The Same Drop Means Different Things</h2>
       </div>
       <div>
-        <p class="lede">Finger effort drops in a malicious release <b>and</b> in a normal placement. A push or an overspeed
-          exceeds normal bounds directly, but a release can only be flagged early if it is judged <b>in context</b>.</p>
+        <p class="lede">Finger effort drops in an attacked release <b>and</b> at every normal placement, so a release stays within the
+          clean range of every channel. A monitor that compares each step with all clean steps must tolerate drops as large as
+          any placement&rsquo;s. One that compares it with clean steps of the <b>same physical context</b> can test earlier
+          whether a drop resembles a placement.</p>
         <p class="lede"><span class="mark">DETOX</span> assigns each step one of four physical contexts (release &gt; contact &gt;
           motion &gt; rest) from telemetry alone, and scores its embedding by the distance to that context&rsquo;s clean center,
           in units of the context&rsquo;s clean spread: <span class="mono" style="color:var(--night-ink)">d<sub>t</sub> = &#8214;&phi;(x<sub>t</sub>) &minus; c<sub>k</sub>&#8214;&sup2; / &sigma;<sub>k</sub></span>.</p>
@@ -617,12 +624,15 @@
     <div class="two-col even" style="margin-top:clamp(36px,4vw,56px)">
       <div class="reveal">
         <h3 class="sub">Measured: what the context buys</h3>
-        <p class="lede">In a post hoc ablation under the same calibration rule, one shared context still flagged 103 of 107
-          releases, but <b>later</b>. The context matters less for flagging releases than for flagging them early enough to stop them.</p>
+        <p class="lede">Refit after opening the test batch with one shared context, under the same calibration rule, the variant
+          still flagged 103 of 107 releases at 0.77% primary false alarms (<span class="mark">DETOX</span>: 106 at 0.56%), but
+          <b>later</b>. In LIBERO-Object, where the object landed a median 7 steps after the opening command, the alarm&rsquo;s
+          delay after that command grew from 2 to 5 steps and prevented releases fell from 37 to 10 of 63. Spatial releases,
+          mostly flagged before the command in both variants, stayed at 43 of 44 prevented.</p>
       </div>
       <div class="chart-card dark reveal" style="background:var(--night-raised); border-color:var(--night-line)">
         <div class="controls"><span class="schematic-tag measured-tag">measured · LIBERO</span><span class="spacer"></span><button class="pill-btn" type="button" data-replay>↻ Replay</button></div>
-        <svg id="ablation-svg" viewBox="0 0 520 250" role="img" aria-label="Ablation: median alarm lead before a release 6 steps with contexts versus 2 with one shared context; prevented releases 80 versus 53 of 107; Object releases prevented 37 versus 10 of 63."></svg>
+        <svg id="ablation-svg" viewBox="0 0 520 250" role="img" aria-label="Ablation: median alarm delay after the opening command on LIBERO-Object releases 2 steps with contexts versus 5 with one shared context; prevented releases 80 versus 53 of 107; Object releases prevented 37 versus 10 of 63."></svg>
         <div class="chart-title"><b>Context ablation, 107 releases</b><span>per-context vs one shared</span></div>
       </div>
     </div>
@@ -649,7 +659,7 @@
     </figure>
     <ol class="steps reveal">
       <li><span class="n">01 · Window</span><b>16 channels × 15 steps</b><span>Gripper aperture and effort, end-effector motion, wrist force and torque, joint torques, plus a one-hot context: 244 dimensions.</span></li>
-      <li><span class="n">02 · Encode</span><b>Three seeded MLPs</b><span>244→192→192→64, trained to pull clean windows to their context center and push attack-free faults past 100 clean spreads.</span></li>
+      <li><span class="n">02 · Encode</span><b>Three seeded MLPs</b><span>244→192→192→64, trained to pull clean windows to their context center and push attack-free faults past 100 clean spreads. The score averages the three over the last five steps.</span></li>
       <li><span class="n">03 · Calibrate</span><b>Split-conformal q<sub>e</sub></b><span>The ⌈(n+1)(1−α)⌉-th smallest clean episode maximum, α = 0.70%, so a new clean episode alarms with probability at most α under exchangeability.</span></li>
       <li><span class="n">04 · Hold</span><b>Latch and replace</b><span>Zero the arm increments, re-close the gripper if an object was held in the last four steps, otherwise keep the last gripper command.</span></li>
     </ol>
@@ -662,13 +672,15 @@
     <div class="sec-head reveal">
       <div>
         <div class="label"><span class="no">06</span>Results</div>
-        <h2>Detection Is Not Prevention</h2>
+        <h2>One Monitor for Both Attack Routes</h2>
       </div>
       <div>
-        <p class="lede">Three attacks (a BackdoorVLA checkpoint, an instruction hijack, and repeated hijacks on a contact-heavy task)
-          over four LIBERO suites, with every method on the same episodes, the same calibration rule, and the same hold.</p>
-        <p class="lede">FAIL-Detect separates attacked from clean episodes about as well as <span class="mark">DETOX</span>
-          (AUROC 0.97 vs 0.96) yet flags only <b>16.1%</b> of harm events before onset.</p>
+        <p class="lede">9,393 held-out episodes over four LIBERO suites, with two attack routes: the BackdoorVLA checkpoint with its
+          instruction trigger in LIBERO-Object, and an instruction attack adapted from SABER on the public OpenVLA-OFT policy in
+          LIBERO-Spatial. Every method runs on the same episodes with the same calibration rule and the same hold.</p>
+        <p class="lede"><b>No policy-side method covered both routes.</b> FAIL-Detect prevented all 63 Object releases and none of the
+          328 Spatial events, while Bera prevented 327 of these and 1 Object release. <span class="mark">DETOX</span> alone flagged
+          more than 97% of every class, although each route ran in its own suite and model.</p>
       </div>
     </div>
 
@@ -709,40 +721,47 @@
         </tbody>
       </table>
     </div>
-    <p class="note reveal">AUROC treats attacked episodes as positives; the harm columns count harm events flagged before onset (%). Policy-side rows take
-      the better of the published and the two-sided score direction on this batch. All rows share the calibration level α, so their clean
-      false-alarm rates differ by sampling noise. Bold marks the best and underline the second best per column. <sup>&dagger;</sup>Bera is built for image
-      triggers, while every attack in this batch enters through the instruction; on a BadVLA pixel trigger it flagged all 500 triggered episodes and none of 150 clean ones.</p>
+    <p class="note reveal">AUROC treats attacked episodes as positives, and the harm columns count defended harms flagged before onset (%).
+      Policy-side rows take the published or two-sided score direction that flagged more events on this batch. Per-channel limits threshold
+      the largest standardized channel value. Clean false alarms count valid harm-free clean episodes. Bold marks the best and underline the
+      second best per column. <sup>&dagger;</sup>On its own target, a BadVLA pixel trigger, our Bera implementation flagged all 500 triggered
+      episodes and none of 150 clean ones.</p>
 
     <div class="two-col even" style="margin-top:clamp(40px,5vw,64px)">
       <div class="reveal">
         <h3 class="sub">Unseen image patch</h3>
-        <p class="lede">Under a public universal patch never used in development, the <b>frozen</b> <span class="mark">DETOX</span> flagged and prevented
-          55 of 73 abrupt releases in a LIBERO-Goal OFT task (75.3%, 95% CI [64.4, 83.8]), at 0.6% and 0.2% clean false alarms in the two batches.
-          No policy-side variant we ran exceeded 36.</p>
+        <p class="lede">Under a third attack, a public image patch unused in development, the <b>frozen</b> <span class="mark">DETOX</span>
+          flagged 55 of 73 abrupt releases (75.3%) in one LIBERO-Goal OFT task over two batches, at up to 0.6% clean false alarms.
+          The best policy-side variant we ran flagged 36 (49.3%). The hold prevented all 55 flagged releases, so under the patch,
+          detection rather than the hold limited prevention.</p>
       </div>
       <div class="chart-card reveal">
         <div class="controls"><span class="schematic-tag measured-tag">measured · LIBERO</span><span class="spacer"></span><button class="pill-btn" type="button" data-replay>↻ Replay</button></div>
-        <svg id="patch-svg" viewBox="0 0 520 170" role="img" aria-label="Unseen patch: DETOX flagged and prevented 55 of 73 releases; the best policy-side variant 36 of 73."></svg>
-        <div class="chart-title"><b>Unseen patch, abrupt releases</b><span>flagged and prevented, of 73</span></div>
+        <svg id="patch-svg" viewBox="0 0 520 170" role="img" aria-label="Unseen patch: DETOX flagged 55 of 73 releases before onset; the best policy-side variant 36 of 73."></svg>
+        <div class="chart-title"><b>Unseen patch, abrupt releases</b><span>flagged before onset, of 73</span></div>
       </div>
     </div>
 
     <div class="two-col" style="margin-top:clamp(40px,5vw,64px)">
       <div class="chart-card reveal">
         <div class="controls"><span class="schematic-tag measured-tag">measured · LIBERO</span><span class="spacer"></span><button class="pill-btn" type="button" data-replay>↻ Replay</button></div>
-        <svg id="lead-svg" viewBox="0 0 640 260" role="img" aria-label="Prevention by alarm lead: 93.6 percent of events with a lead of at least three steps, 10 of 12 with a lead of one or two steps, and the one event alarmed at the onset step."></svg>
-        <div class="chart-title"><b>Hold outcome by alarm lead</b><span>Q3 · replayed hold</span></div>
+        <svg id="lead-svg" viewBox="0 0 640 300" role="img" aria-label="Abrupt releases prevented by the hold: 43 of 44 in LIBERO-Spatial, where the alarm preceded the opening command in 40 of 43 flagged releases; 37 of 63 in LIBERO-Object, where the alarm followed the command in 58 of 63."></svg>
+        <div class="chart-title"><b>Abrupt releases, prevented by the hold</b><span>Q3 · replayed hold</span></div>
       </div>
       <div class="reveal">
-        <h3 class="sub">Where the hold falls short</h3>
+        <h3 class="sub">Where the alarm comes too late</h3>
         <dl class="kv">
           <div><dt>Prevented overall</dt><dd>363<small>/ 391</small></dd></div>
-          <div><dt>Events still occurring</dt><dd>28</dd></div>
-          <div><dt>Of those, Object releases that slipped from the re-closed gripper</dt><dd>24</dd></div>
-          <div><dt>New events caused by the hold (attacked / clean)</dt><dd>0<small>/ 1 slip</small></dd></div>
+          <div><dt>Contacts, overspeeds, and Spatial releases prevented</dt><dd>326<small>/ 328</small></dd></div>
+          <div><dt>LIBERO-Object releases prevented</dt><dd>37<small>/ 63</small></dd></div>
+          <div><dt>Object releases with the alarm after the opening command</dt><dd>58<small>/ 63</small></dd></div>
+          <div><dt>New events caused by the hold in attacked runs</dt><dd>0</dd></div>
         </dl>
-        <p class="note">For LIBERO-Object releases the limit lies in the hold, not in sensing: the alarm came a median 5 steps early, yet the object slipped from the re-closed fingers.</p>
+        <p class="note">In Spatial, the alarm preceded the opening command by a median 8 steps. In Object it followed the command by a
+          median 2 steps, since <span class="mark">DETOX</span> reads the fingers and not the command. The hold then re-closed fingers
+          that were already opening, and in 24 of the 26 misses the object slipped out. The same hold prevented all 63 on
+          FAIL-Detect&rsquo;s earlier alarm, so a policy-side detector that fires earlier could run above
+          <span class="mark">DETOX</span> to close this gap.</p>
       </div>
     </div>
   </div>
@@ -756,17 +775,19 @@
         <div class="label"><span class="no">07</span>Real robot</div>
         <h2>The Loop Closes on a Real Arm</h2>
       </div>
-      <p class="lede">We fine-tuned OpenVLA-OFT on 29 teleoperated demonstrations and poisoned it with a text trigger that opens the gripper
-        in transport. <span class="mark">DETOX</span> was fitted on 80 clean runs and calibrated on 20, on the same 16 arm, wrist, and gripper
-        channels, then run online.</p>
+      <p class="lede">We tested online the case that the simulated hold left open. We fine-tuned OpenVLA-OFT on 29 teleoperated
+        demonstrations and poisoned it with a text trigger that opens the gripper while it carries a stuffed toy. Because the owner also
+        controls the actuator, the gripper driver capped the opening speed at one third. <span class="mark">DETOX</span> was fitted on
+        80 clean runs and calibrated on 20 at &alpha; = 4.8%, the smallest level that 20 runs allow.</p>
     </div>
     <div class="hw-grid">
       <div class="reveal" style="display:flex; flex-direction:column; gap:16px">
         <div class="photo"><img src="static/img/ur5e_setup.jpg" width="640" height="480" loading="lazy" alt="UR5e workstation at the start of a trial: the arm with a two-finger gripper above a table with a plush toy and a pink box."><span class="tag">trial start · base camera</span></div>
         <dl class="kv">
-          <div><dt>Triggered releases, object kept with the hold</dt><dd>9<small>/ 10</small></dd></div>
-          <div><dt>Triggered releases without the hold, object fell</dt><dd>5<small>/ 5</small></dd></div>
-          <div><dt>Per-channel limits, object kept</dt><dd>0<small>/ 10</small></dd></div>
+          <div><dt>Triggered releases, toy kept with the hold</dt><dd>9<small>/ 10</small></dd></div>
+          <div><dt>Triggered releases without the hold, toy fell</dt><dd>5<small>/ 5</small></dd></div>
+          <div><dt>Trials without the hold, alarmed by DETOX</dt><dd>5<small>/ 5</small></dd></div>
+          <div><dt>Trials without the hold, alarmed by per-channel limits</dt><dd>0<small>/ 5</small></dd></div>
           <div><dt>Clean trials with a false alarm</dt><dd>2<small>/ 20</small></dd></div>
         </dl>
       </div>
@@ -783,8 +804,11 @@
         </div>
         <svg id="hw-svg" viewBox="0 0 640 380" role="img" aria-label="Recorded gripper aperture in millimetres against time from the opening onset for two triggered trials. With the DETOX hold, the alarm comes 150 milliseconds after onset and the fingers reverse at about 15 millimetres of opening; the toy stays in the gripper. Without the hold, the gripper opens fully and the toy falls."></svg>
         <div class="chart-title"><b>Gripper aperture after the triggered opening</b><span>mm vs s from onset</span></div>
-        <p class="note" style="margin-top:10px">One protected and one unprotected triggered trial from the same session, aligned at the opening onset. On hardware the alarm came a median 3 steps (150&nbsp;ms)
-          after the opening command, when the fingers had opened 10&nbsp;mm; they reversed at a median 15&nbsp;mm. Operator verdicts: kept (with hold), fell (without). The hardware trials logged telemetry and one start photo per trial, not video.</p>
+        <p class="note" style="margin-top:10px">One protected and one unprotected triggered trial from the same session, aligned at the opening onset. The alarm came a median 3 steps (150&nbsp;ms)
+          after the opening command and the fingers reversed at 15&nbsp;mm, whereas in the one failure they reached 24&nbsp;mm and the toy fell. A hold fixed at one step after
+          the command kept 5 of 5, so the alarm delay may explain that failure. The 10 protected trials are those that reached the opening command, of 11 attempted.
+          One false alarm came before the trigger was issued, and the operator stopped 5 other clean trials and 1 unprotected triggered trial before any alarm.
+          Operator verdicts: kept (with hold), fell (without). The hardware trials logged telemetry and one start photo per trial, not video.</p>
       </div>
     </div>
   </div>
@@ -801,13 +825,13 @@
       <p class="lede">Short answers to the questions we hear most, with the numbers from the manuscript.</p>
     </div>
     <div class="faq">
-      <div class="card faq-card reveal"><h3>What is DETOX?</h3><p>DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot&#x27;s own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold before the robot executes it.</p></div>
-      <div class="card faq-card reveal"><h3>Which attacks and harms does DETOX defend against?</h3><p>DETOX targets a compromised policy: backdoored weights, a hijacked instruction, or an adversarial image patch. It defends three physical harms defined by their consequence: an abrupt release that drops a lifted object, a forceful contact that pushes a bystander object more than 2 cm or hits the table, and an overspeed above the clean maximum speed of the task suite.</p></div>
-      <div class="card faq-card reveal"><h3>Why not read the policy&#x27;s hidden states, images, or instructions?</h3><p>Those are the channels the attacker shapes. DETOX trusts only the telemetry the owner controls, which the attacker can change only by actually moving the robot. Detecting the attack is also not the same as stopping the harm: FAIL-Detect separates attacked from clean episodes about as well as DETOX (AUROC 0.97 vs 0.96) yet flags only 16.1% of harm events before onset.</p></div>
-      <div class="card faq-card reveal"><h3>What is the context-normalized score?</h3><p>Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context&#x27;s clean center in units of the context&#x27;s clean spread. A finger-effort drop is normal when an object is set down but alarming mid-transport. In an ablation, the contexts raised the median alarm lead before a release from 2 to 6 control steps and the prevented releases from 53 to 80 of 107.</p></div>
-      <div class="card faq-card reveal"><h3>Does DETOX need attack data?</h3><p>No. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability.</p></div>
-      <div class="card faq-card reveal"><h3>What results does DETOX achieve?</h3><p>On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 harm events before onset (99.2%) at 0.56% clean false alarms (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged and prevented 55 of 73 releases, versus at most 36. On a real UR5e with a backdoored OpenVLA-OFT policy, its online hold kept the carried object in 9 of 10 triggered releases, while without the hold the object fell in 5 of 5.</p></div>
-      <div class="card faq-card reveal"><h3>What are the limits of DETOX?</h3><p>The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. In LIBERO-Object, 24 released objects slipped from the re-closed gripper despite an early alarm, so the limit there lies in the hold rather than in sensing.</p></div>
+      <div class="card faq-card reveal"><h3>What is DETOX?</h3><p>DETOX is a runtime defense for vision-language-action (VLA) robot policies. It sits between the policy and the robot, reads only the robot&#x27;s own trusted telemetry (gripper aperture and effort, end-effector motion, wrist force and torque, joint torques) at every 20 Hz control step, and on an alarm replaces the next command with a hold. It is a last line of defense that can run beneath any policy-side detector.</p></div>
+      <div class="card faq-card reveal"><h3>Which attacks and harms does DETOX defend against?</h3><p>DETOX treats the policy weights, the instruction, and the camera images as untrusted, since a backdoored public checkpoint, an edited instruction, and an image patch each alter one of them. It defends three physical harms defined on the state of the robot and its surroundings: an abrupt release that drops a lifted object back onto its surface, a forceful contact whose wrist-force peak exceeds the clean maximum and lands the held object or displaces a bystander object more than 2 cm, and an overspeed above the clean maximum speed of the task suite. Under the two simulated attacks, these classes hold 391 of the 425 harm events.</p></div>
+      <div class="card faq-card reveal"><h3>Why not read the policy&#x27;s hidden states, images, or instructions?</h3><p>The attack can shape those signals, so what a policy-side detector catches depends on the attack route. On the same episodes, FAIL-Detect prevented all 63 backdoor-triggered releases and none of the 328 events under the instruction attack, while Bera prevented 327 of those and 1 backdoor-triggered release. DETOX trusts only the telemetry the owner controls, which the attacker can change only by moving the robot.</p></div>
+      <div class="card faq-card reveal"><h3>What is the context-normalized score?</h3><p>Each step gets one of four physical contexts (release, contact, motion, rest) from telemetry alone, and its embedding is scored by the distance to that context&#x27;s clean center in units of the context&#x27;s clean spread. Finger effort also drops at every normal placement, so a release stays within the clean range of every channel. In a post hoc ablation with one shared context, the alarm on LIBERO-Object releases came 5 instead of 2 steps after the opening command, and the prevented releases fell from 80 to 53 of 107.</p></div>
+      <div class="card faq-card reveal"><h3>Does DETOX need attack data?</h3><p>No attacked run entered fitting or calibration. The encoder is trained on clean runs plus attack-free simulated faults and physical excursions, and one split-conformal threshold per environment is calibrated on clean runs of the deployed model at alpha = 0.70%, so a new clean episode alarms with probability at most alpha under exchangeability. The score&#x27;s design and constants were set on development data that included attacked runs, and everything was fixed before the test batch was opened.</p></div>
+      <div class="card faq-card reveal"><h3>What results does DETOX achieve?</h3><p>On 9,393 held-out simulated LIBERO episodes, DETOX flagged 388 of 391 defended harms before onset (99.2%) at 0.56% false alarms in valid harm-free clean episodes (16 of 2,843), and its replayed hold prevented 363 (92.8%), versus at most 328 (83.9%) for five policy-side defenses and failure detectors. Under an unseen image patch the frozen DETOX flagged 55 of 73 releases, versus at most 36, and the hold prevented all 55. On a real UR5e with a backdoored OpenVLA-OFT policy and a capped opening speed, its online hold kept the grasp in 9 of 10 triggered releases, while without the hold the toy fell in 5 of 5.</p></div>
+      <div class="card faq-card reveal"><h3>What are the limits of DETOX?</h3><p>The evaluation covers three non-adaptive attacks in simulation and one backdoor attack on hardware. DETOX reads the fingers and not the command, so in LIBERO-Object the alarm followed the opening command in 58 of 63 releases and the hold prevented 37, while the same hold prevented all 63 on FAIL-Detect&#x27;s earlier alarm. The false-alarm rate holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of valid harm-free clean runs of an uncalibrated public OFT policy alarmed, and a threshold recalibrated on other clean OFT runs alarmed in 0.85% and 1.9% of two other batches, both above alpha.</p></div>
       <div class="card faq-card reveal"><h3>Are the paper and code available?</h3><p>The paper is under review and the code will be released upon publication. This page shows the method, the results, and recorded UR5e gripper traces.</p></div>
     </div>
   </div>
@@ -827,21 +851,8 @@
       </ul>
     </div>
     <div class="prose reveal">
-      <p>Vision&ndash;language&ndash;action (VLA) policies are usually deployed from public checkpoints, and backdoored weights or a manipulated
-        instruction can make the robot drop a carried object, push a bystander object, or move too fast. Detecting the attack is not enough.
-        Once the grip is lost the object is already falling, so the harm must be stopped before onset. Existing defenses read the policy&rsquo;s
-        hidden states or inputs, which the attacker shapes, and do not measure harms prevented. We propose <span class="mark">DETOX</span>, a runtime
-        defense that reads only owner-side physical telemetry and, on an alarm, replaces the next command with a hold. We hypothesize that a
-        physical change signals harm only relative to the robot&rsquo;s context, since finger effort drops in a malicious release and in a normal
-        placement alike. <span class="mark">DETOX</span> therefore scores each step against clean behavior from the same context, trains without attack
-        data, and calibrates its threshold on clean runs of the deployed model. On 9,393 simulated LIBERO episodes, <span class="mark">DETOX</span>
-        flagged 388 of 391 harm events before onset at 0.56% false alarms, and its replayed hold prevented 363, versus at most 328 for five
-        policy-side baselines. Under an unseen image patch, the frozen <span class="mark">DETOX</span> flagged 55 of 73 releases, versus at most 36
-        for the baselines. On a UR5e arm, its online hold kept the carried object in 9 of 10 triggered releases of a backdoored OpenVLA-OFT policy.</p>
-      <div class="scope"><b>Scope.</b> This submission evaluates three non-adaptive attacks in simulation and one backdoor attack on hardware.
-        The false-alarm guarantee holds for the calibrated model: with the LIBERO-Object threshold, 12.0% of clean runs of an uncalibrated public
-        OFT policy alarmed, and recalibrating on its clean runs lowered this to 0.85%. Adaptive attackers and bystander removal with a real object
-        tracker are planned for the final version.</div>
+      <p>The weights, instruction, and camera images of a vision&ndash;language&ndash;action (VLA) policy originate outside the robot. An attacker who alters any of them can make the robot drop an object, push with excessive force, or move at excessive speed. Existing defenses read these components or signals computed from them. Only the robot&rsquo;s own telemetry can be trusted, since an attacker can alter it only by moving the robot, which any harm requires. We propose <span class="mark">DETOX</span>, a last line of defense that reads only this telemetry and holds the robot on an alarm. A release caused by an attack stays within the clean range of every channel, because the finger effort also drops at normal placements. <span class="mark">DETOX</span> compares each step with clean steps of the same physical context, which more than halved the alarm&rsquo;s delay on backdoor-triggered releases. Fitted without attack data, <span class="mark">DETOX</span> flagged 99% of defended harms before onset under two simulated attacks, at 0.56% false alarms in valid harm-free clean episodes. Its hold prevented 93% of these harms, more than any policy-side detector we ran. On a UR5e arm with a capped opening speed, the online hold kept the grasp in 9 of 10 backdoor-triggered releases.</p>
+      <div class="scope"><b>Scope.</b> This Stage&nbsp;1 submission evaluates three non-adaptive attacks in simulation and one backdoor attack on hardware. The 0.56% false-alarm rate describes valid harm-free clean episodes of the calibrated models. With the LIBERO-Object threshold, 12.0% of these episodes of an uncalibrated public OFT policy alarmed.</div>
     </div>
   </div>
 </section>
@@ -886,8 +897,8 @@
   </div>
 </footer>
 
-<script src="static/data/ur5e_traces.js?v=20261125a"></script>
-<script src="static/videos/manifest.js?v=20261125a"></script>
-<script src="static/detox.js?v=20261125a"></script>
+<script src="static/data/ur5e_traces.js?v=20261128a"></script>
+<script src="static/videos/manifest.js?v=20261128a"></script>
+<script src="static/detox.js?v=20261128a"></script>
 </body>
 </html>
